@@ -1,0 +1,35 @@
+name: Backend Push Changes to Main Repo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  push-main:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Setup Git
+      run: |
+        git config --global user.email "action@github.com"
+        git config --global user.name "GitHub Action"
+
+    - name: Clone the central repository
+      run: |
+        git clone https://neo-jgrec:${{ secrets.APP_GITHUB_PAT_TOKEN }}@github.com/AREA-equipe/app.git _app_tek
+
+    - name: Pull/Add Backend repository as a subtree
+      working-directory: _app_tek
+      run: |
+        if [ -d "backend" ]; then
+          git subtree pull --prefix=backend https://neo-jgrec:${{ secrets.APP_GITHUB_PAT_TOKEN }}@github.com/AREA-equipe/backend.git main --squash
+        else
+          git subtree add --prefix=backend https://neo-jgrec:${{ secrets.APP_GITHUB_PAT_TOKEN }}@github.com/AREA-equipe/backend.git main --squash
+        fi
+
+    - name: Push to central repository
+      working-directory: _app_tek
+      run: |
+        git push origin main
