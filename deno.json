@@ -1,6 +1,7 @@
 {
   "tasks": {
-    "start": "deno run --allow-net main.ts"
+    "dev": "deno run --allow-net --watch main.ts",
+    "build": "deno compile --allow-net main.ts"
   },
   "exclude": ["dist", "node_modules", "**/*.lock"],
   "fmt": {
