@@ -1,3 +1,14 @@
+# Deno Task
+
+## Development
+
+```bash
+deno task dev
 ```
-deno task start
+
+## Production
+
+```bash
+deno task build
+./backend
 ```
