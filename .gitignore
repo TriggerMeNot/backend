@@ -1,3 +1,7 @@
 # Binary
 dist/
 coverage/
+
+# Environment
+*.env*
+!*.env*.example
