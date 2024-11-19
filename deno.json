@@ -1,9 +1,9 @@
 {
   "tasks": {
-    "dev": "deno run --allow-env --allow-read --allow-net --watch app/main.ts",
-    "build": "deno compile --allow-env --allow-read --allow-net  --output dist/app app/main.ts",
-    "test": "deno test --allow-net=0.0.0.0:8080 --watch",
-    "coverage": "deno test --coverage --clean && deno coverage"
+    "dev": "deno run --allow-env --env-file=.env.dev --allow-read --allow-net --watch app/main.ts",
+    "build": "deno compile --allow-env --allow-read --allow-net --output dist/app app/main.ts",
+    "test": "deno test --allow-env --env-file=.env.dev --allow-net=0.0.0.0 --watch",
+    "coverage": "deno test --allow-net=0.0.0.0 --coverage --clean && deno coverage"
   },
   "exclude": ["dist", "node_modules", "**/*.lock"],
   "fmt": {

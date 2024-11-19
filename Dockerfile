@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY deno.json .
 COPY deno.lock .
-copy app ./app
+COPY app ./app
 
 RUN deno task build
 
