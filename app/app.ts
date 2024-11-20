@@ -3,9 +3,8 @@ import { serveStatic } from "@hono/deno";
 import { logger } from "@hono/logger";
 import { prettyJSON } from "@hono/pretty-json";
 import { cors } from "@hono/cors";
+import { swaggerUI } from "@hono/swagger-ui";
 import { apiReference } from "@scalar/hono-api-reference";
-import { jwt, sign } from "@hono/jwt";
-import type { JwtVariables } from "@hono/jwt";
 import { describeRoute, openAPISpecs } from "@hono-openapi";
 
 if (!Deno.env.has("JWT_SECRET")) {
@@ -13,28 +12,15 @@ if (!Deno.env.has("JWT_SECRET")) {
   Deno.exit(1);
 }
 
-const app = new Hono<{ Variables: JwtVariables }>();
+const app = new Hono();
 
 app.use("*", logger());
 app.use("*", prettyJSON());
 app.use("/api/*", cors());
 
+app.get("/static/*", serveStatic({ precompressed: true }));
 app.use("/static/*", serveStatic({ root: "./static" }));
 app.use("/favicon.ico", serveStatic({ path: "./static/favicon.ico" }));
-
-app.use("/auth/*", (c, next) => {
-  const jwtMiddleware = jwt({
-    secret: Deno.env.get("JWT_SECRET") || "",
-  });
-  return jwtMiddleware(c, next);
-});
-
-app.get(
-  "/static/*",
-  serveStatic({
-    precompressed: true,
-  }),
-);
 
 app.get(
   "/",
@@ -59,81 +45,17 @@ app.get(
   },
 );
 
-app.get(
-  "/login",
-  describeRoute({
-    description: "Login to get a token",
-    responses: {
-      200: {
-        description: "Successful login response",
-        content: {
-          "application/json": {
-            schema: {
-              type: "object",
-              properties: {
-                token: {
-                  type: "string",
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  }),
-  async (c) => {
-    const payload = {
-      sub: "user123",
-      role: "admin",
-      exp: Math.floor(Date.now() / 1000) + 60 * 5, // Token expires in 5 minutes
-    };
-    const token = await sign(payload, Deno.env.get("JWT_SECRET")!);
-    return c.json({ token });
-  },
-);
-
-app.get(
-  "/auth/page",
-  describeRoute({
-    description: "Protected page",
-    responses: {
-      200: {
-        description: "Successful greeting response",
-        content: {
-          "text/plain": {
-            schema: {
-              type: "string",
-              example: "You are authorized",
-            },
-          },
-        },
-      },
-      401: {
-        description: "Unauthorized",
-        content: {
-          "text/plain": {
-            schema: {
-              type: "string",
-              example: "Unauthorized",
-            },
-          },
-        },
-      },
-    },
-  }),
-  (c) => {
-    return c.text("You are authorized");
-  },
-);
+import authRouter from "./routes/auth.ts";
+app.route("/auth", authRouter);
 
 app.get(
   "/openapi",
   openAPISpecs(app as unknown as Hono, {
     documentation: {
       info: {
-        title: "Hono",
+        title: "AREA API",
         version: "1.0.0",
-        description: "API for greeting users",
+        description: "API for Actions, REActions",
       },
       components: {
         securitySchemes: {
@@ -160,7 +82,13 @@ app.get(
 );
 
 app.get(
-  "/docs",
+  "doc",
+  swaggerUI({
+    url: "/openapi",
+  }),
+);
+app.get(
+  "/reference",
   apiReference({
     theme: "saturn",
     spec: {
