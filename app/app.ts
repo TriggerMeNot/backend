@@ -50,6 +50,9 @@ app.get(
   },
 );
 
+import wsRouter from "./routes/ws.ts";
+app.route("/ws", wsRouter);
+
 import authRouter from "./routes/auth.ts";
 app.route("/auth", authRouter);
 
