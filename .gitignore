@@ -1,4 +1,6 @@
-# Binary
+# Folder
+node_modules/
+drizzle/
 dist/
 coverage/
 

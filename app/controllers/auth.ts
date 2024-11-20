@@ -1,25 +1,25 @@
 import { Context } from "@hono";
 import { sign } from "@hono/jwt";
-
-const users = [
-  {
-    email: "example@email.com",
-    username: "User Test",
-    password: "password",
-  },
-];
+import { db } from "../db/config.ts";
+import { users as userSchema } from "../schemas/users.ts";
+import { and, eq } from "drizzle-orm/expressions";
 
 async function login(ctx: Context) {
   // @ts-ignore - The `form` validator is added by the `validator` middleware
   const { email, password } = ctx.req.valid("form");
 
-  const user = users.find((user) =>
-    user.email === email && user.password === password
-  );
+  const users = await db.select().from(userSchema).where(
+    and(
+      eq(userSchema.email, email),
+      eq(userSchema.password, password),
+    ),
+  ).limit(1);
 
-  if (!user) {
+  if (!users.length) {
     return ctx.json({ message: "Invalid email or password" }, 401);
   }
+
+  const user = users[0];
 
   const payload = {
     sub: `${user.username}:${user.email}`,
@@ -31,17 +31,19 @@ async function login(ctx: Context) {
   return ctx.json({ token });
 }
 
-function register(ctx: Context) {
+async function register(ctx: Context) {
   // @ts-ignore - The `form` validator is added by the `validator` middleware
   const { email, username, password } = ctx.req.valid("form");
 
-  const user = users.find((user) => user.email === email);
+  const users = await db.select().from(userSchema).where(
+    eq(userSchema.email, email),
+  ).limit(1);
 
-  if (user) {
+  if (users.length) {
     return ctx.json({ message: "User already exists" }, 400);
   }
 
-  users.push({ email, username, password });
+  await db.insert(userSchema).values({ email, username, password });
   return ctx.json({ email, username });
 }
 
