@@ -8,9 +8,10 @@ import { apiReference } from "@scalar/hono-api-reference";
 import { describeRoute, openAPISpecs } from "@hono-openapi";
 import { prometheus } from "@hono/prometheus";
 
-if (!Deno.env.has("JWT_SECRET")) {
-  console.error("JWT_SECRET is not set");
-  Deno.exit(1);
+if (!Deno.env.has("JWT_SECRET") || !Deno.env.has("DATABASE_URL")) {
+  throw new Error(
+    "Please set the JWT_SECRET and DATABASE_URL environment variables",
+  );
 }
 
 const app = new Hono();
