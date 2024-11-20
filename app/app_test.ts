@@ -1,11 +1,11 @@
 import app from "./app.ts";
 import { assertEquals } from "@std/assert";
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { Hono } from "@hono";
 
 Deno.test({
   name: "App is defined",
   fn() {
-    assertEquals(app instanceof OpenAPIHono, true);
+    assertEquals(app instanceof Hono, true);
   },
 });
 

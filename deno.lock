@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@std/assert@^1.0.8": "1.0.8",
     "jsr:@std/internal@^1.0.5": "1.0.5",
+    "npm:@hono/swagger-ui@~0.4.1": "0.4.1_hono@4.6.10",
     "npm:@scalar/hono-api-reference@~0.5.159": "0.5.159_hono@4.6.10",
     "npm:hono-openapi@~0.1.5": "0.1.5_@hono+zod-validator@0.4.1__hono@4.6.10__zod@3.23.8_hono@4.6.10_openapi-types@12.1.3_zod@3.23.8_zod-openapi@3.3.0__zod@3.23.8",
     "npm:hono@^4.6.10": "4.6.10",
@@ -21,6 +22,12 @@
     }
   },
   "npm": {
+    "@hono/swagger-ui@0.4.1_hono@4.6.10": {
+      "integrity": "sha512-kPaJatHffeYQ3yVkHo878hCqwfapqx54FczJVJ+eRWt8J4biyVVMIdCAJb6MyA8bcnHUoTmUpPc7OJAV1VTg2g==",
+      "dependencies": [
+        "hono"
+      ]
+    },
     "@hono/zod-validator@0.4.1_hono@4.6.10_zod@3.23.8": {
       "integrity": "sha512-I8LyfeJfvVmC5hPjZ2Iij7RjexlgSBT7QJudZ4JvNPLxn0JQ3sqclz2zydlwISAnw21D2n4LQ0nfZdoiv9fQQA==",
       "dependencies": [
@@ -90,9 +97,23 @@
       "integrity": "sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g=="
     }
   },
+  "redirects": {
+    "https://deno.land/x/djwt/mod.ts": "https://deno.land/x/djwt@v3.0.2/mod.ts"
+  },
+  "remote": {
+    "https://deno.land/std@0.221.0/encoding/_util.ts": "beacef316c1255da9bc8e95afb1fa56ed69baef919c88dc06ae6cb7a6103d376",
+    "https://deno.land/std@0.221.0/encoding/base64.ts": "8ccae67a1227b875340a8582ff707f37b131df435b07080d3bb58e07f5f97807",
+    "https://deno.land/std@0.221.0/encoding/base64url.ts": "9cc46cf510436be63ac00ebf97a7de1993e603ca58e1853b344bf90d80ea9945",
+    "https://deno.land/x/djwt@v3.0.2/algorithm.ts": "b1c6645f9dbd6e6c47c123a3b18c28b956f91c65ed17f5b6d5d968fc3750542b",
+    "https://deno.land/x/djwt@v3.0.2/deps.ts": "a7954fe567f2097b4f6aca11d091b6df658e485a817ac4dee47257ed5c28fd6e",
+    "https://deno.land/x/djwt@v3.0.2/mod.ts": "962d8f2c4d6a4db111f45d777b152356aec31ba7db0ca664601175a422629857",
+    "https://deno.land/x/djwt@v3.0.2/signature.ts": "16238fbf558267c85dd6c0178045f006c8b914a7301db87149f3318326569272",
+    "https://deno.land/x/djwt@v3.0.2/util.ts": "5cb264d2125c553678e11446bcfa0494025d120e3f59d0a3ab38f6800def697d"
+  },
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@^1.0.8",
+      "npm:@hono/swagger-ui@~0.4.1",
       "npm:@scalar/hono-api-reference@~0.5.159",
       "npm:hono-openapi@~0.1.5",
       "npm:hono@^4.6.10",
