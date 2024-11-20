@@ -6,6 +6,7 @@ import { cors } from "@hono/cors";
 import { swaggerUI } from "@hono/swagger-ui";
 import { apiReference } from "@scalar/hono-api-reference";
 import { describeRoute, openAPISpecs } from "@hono-openapi";
+import { prometheus } from "@hono/prometheus";
 
 if (!Deno.env.has("JWT_SECRET")) {
   console.error("JWT_SECRET is not set");
@@ -14,8 +15,12 @@ if (!Deno.env.has("JWT_SECRET")) {
 
 const app = new Hono();
 
+const { printMetrics, registerMetrics } = prometheus();
+
 app.use("*", logger());
 app.use("*", prettyJSON());
+app.use("*", registerMetrics);
+
 app.use("/api/*", cors());
 
 app.get("/static/*", serveStatic({ precompressed: true }));
@@ -96,5 +101,7 @@ app.get(
     },
   }),
 );
+
+app.get("/metrics", printMetrics);
 
 export default app;
