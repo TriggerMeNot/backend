@@ -2,12 +2,12 @@ services:
   backend:
     build:
       dockerfile: Dockerfile
-      args:
-        - DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@db:5432/$POSTGRES_DB
     depends_on:
       - db
     env_file:
       - .env
+    environment:
+      - DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@db:5432/$POSTGRES_DB
     networks:
       - app-network
   db:
