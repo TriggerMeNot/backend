@@ -1,8 +1,18 @@
 import { Hono } from "@hono";
 import { describeRoute } from "@hono-openapi";
+import { upgradeWebSocket } from "@hono/deno";
+import { Context } from "@hono";
 
 const wsRouter = new Hono();
 const connections = new Set<WebSocket>();
+
+const broadcast = (message: string) => {
+  connections.forEach((socket) => {
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(message);
+    }
+  });
+};
 
 wsRouter.get(
   "/",
@@ -23,7 +33,7 @@ wsRouter.get(
       },
     },
   }),
-  (c) => {
+  upgradeWebSocket((c: Context) => {
     // Access headers correctly using c.req.raw, which should be the raw request object
     const headers = c.req.raw.headers;
 
@@ -43,7 +53,17 @@ wsRouter.get(
 
       socket.onmessage = (event) => {
         console.log(`Received message: ${event.data}`);
-        socket.send(`Echo: ${event.data}`);
+        try {
+          const message = JSON.parse(event.data);
+          if (message.type === "broadcast") {
+            broadcast(message.data);
+          } else {
+            socket.send(`Echo: ${event.data}`);
+          }
+        } catch (err) {
+          console.error("Invalid message format: ", err);
+          socket.send("Invalid message format");
+        }
       };
 
       socket.onclose = () => {
@@ -55,13 +75,21 @@ wsRouter.get(
         console.error("WebSocket error:", error);
       };
 
-      // Return WebSocket response
-      return response;
+      return {
+        response,
+        onMessage: socket.onmessage,
+        onClose: socket.onclose,
+        onError: socket.onerror,
+      };
     } else {
       // Return 400 if not a valid WebSocket upgrade request
-      return c.text("Invalid WebSocket request", 400);
+      return {
+        onMessage: () => {},
+        onClose: () => {},
+        onError: () => {},
+      };
     }
-  }
+  }),
 );
 
 export default wsRouter;
