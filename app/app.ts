@@ -7,6 +7,9 @@ import { swaggerUI } from "@hono/swagger-ui";
 import { apiReference } from "@scalar/hono-api-reference";
 import { describeRoute, openAPISpecs } from "@hono-openapi";
 import { prometheus } from "@hono/prometheus";
+import { jwt } from "@hono/jwt";
+import authRouter from "./routes/auth.ts";
+import githubRouter from "./routes/github.ts";
 
 if (!Deno.env.has("JWT_SECRET") || !Deno.env.has("DATABASE_URL")) {
   throw new Error(
@@ -51,7 +54,6 @@ app.get(
   },
 );
 
-import authRouter from "./routes/auth.ts";
 app.route("/auth", authRouter);
 
 app.get(
@@ -104,5 +106,13 @@ app.get(
 );
 
 app.get("/metrics", printMetrics);
+
+app.use(
+  "/*",
+  jwt({
+    secret: Deno.env.get("JWT_SECRET")!,
+  }),
+);
+app.route("/github", githubRouter);
 
 export default app;

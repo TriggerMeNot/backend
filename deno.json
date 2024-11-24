@@ -21,6 +21,7 @@
   "imports": {
     "@hono": "npm:hono@^4.6.10",
     "@hono-openapi": "npm:hono-openapi@^0.1.5",
+    "@hono/oauth-providers": "npm:@hono/oauth-providers@^0.6.2",
     "@hono/prometheus": "npm:@hono/prometheus@^1.0.1",
     "@hono/swagger-ui": "npm:@hono/swagger-ui@^0.4.1",
     "@scalar/hono-api-reference": "npm:@scalar/hono-api-reference@^0.5.159",

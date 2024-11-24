@@ -86,7 +86,8 @@ docker compose -f compose.prod.yml up -d
 
 ## Routes Documentation
 
-Go on running server and open the `/doc` or `/reference` route to see Routes Documentation.
+Go on running server and open the `/doc` or `/reference` route to see Routes
+Documentation.
 
 ## Database
 
@@ -113,6 +114,7 @@ OAuths {
     int userId
     int serviceId
     string accessToken
+    string refreshToken
 }
 OAuths |o--|| Users : owner
 OAuths |o--|| Services : provider

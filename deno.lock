@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@std/assert@^1.0.8": "1.0.8",
     "jsr:@std/internal@^1.0.5": "1.0.5",
+    "npm:@hono/oauth-providers@~0.6.2": "0.6.2_hono@4.6.10",
     "npm:@hono/prometheus@^1.0.1": "1.0.1_hono@4.6.10_prom-client@15.1.3",
     "npm:@hono/swagger-ui@~0.4.1": "0.4.1_hono@4.6.10",
     "npm:@scalar/hono-api-reference@~0.5.159": "0.5.159_hono@4.6.10",
@@ -180,6 +181,12 @@
     },
     "@esbuild/win32-x64@0.19.12": {
       "integrity": "sha512-T1QyPSDCyMXaO3pzBkF96E8xMkiRYbUEZADd29SyPGabqxMViNoii+NcK7eWJAEoU6RZyEm5lVSIjTmcdoB9HA=="
+    },
+    "@hono/oauth-providers@0.6.2_hono@4.6.10": {
+      "integrity": "sha512-Uo2Lf+GnaPGebkC4GUQMRD9spIKonav/gWwSapEJhCKQjq1WVxTLIlCykNRhJtcizPCPc6OAV3A9RAYk0kX9XQ==",
+      "dependencies": [
+        "hono"
+      ]
     },
     "@hono/prometheus@1.0.1_hono@4.6.10_prom-client@15.1.3": {
       "integrity": "sha512-PjMbjAppCgbvRP2aLxqJc1XJLxfmg4dLsS5R5ITt7qCf9Ab/xSRul/LHNVvYK2/ECi3BOPprSnlSizksBJmXBQ==",
@@ -526,6 +533,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@^1.0.8",
+      "npm:@hono/oauth-providers@~0.6.2",
       "npm:@hono/prometheus@^1.0.1",
       "npm:@hono/swagger-ui@~0.4.1",
       "npm:@scalar/hono-api-reference@~0.5.159",
