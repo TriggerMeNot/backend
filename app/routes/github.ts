@@ -1,7 +1,6 @@
 import { Hono } from "@hono";
 import { describeRoute } from "@hono-openapi";
 import { resolver, validator } from "@hono-openapi/zod";
-import jwtMiddleware from "../middlewares/jwt.ts";
 import { githubAuth } from "@hono/oauth-providers/github";
 import GithubSchema from "../interfaces/github.ts";
 import GithubController from "../controllers/github.ts";
@@ -14,10 +13,8 @@ if (!Deno.env.get("GITHUB_ID") || !Deno.env.get("GITHUB_SECRET")) {
   );
 }
 
-githubRouter.use("*", jwtMiddleware);
-
 githubRouter.use(
-  "/",
+  "*",
   githubAuth({
     client_id: Deno.env.get("GITHUB_ID"),
     client_secret: Deno.env.get("GITHUB_SECRET"),
@@ -30,7 +27,8 @@ githubRouter.get(
   "/",
   describeRoute({
     tags: ["github"],
-    description: "Callback for Github OAuth",
+    description:
+      "Callback for Github OAuth, Login or Register when no Bearer token is provided",
     responses: {
       200: {
         description: "Successful Github OAuth response",
