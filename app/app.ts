@@ -8,6 +8,7 @@ import { apiReference } from "@scalar/hono-api-reference";
 import { describeRoute, openAPISpecs } from "@hono-openapi";
 import { prometheus } from "@hono/prometheus";
 import { jwt } from "@hono/jwt";
+import defaultRouter from "./routes/default.ts";
 import authRouter from "./routes/auth.ts";
 import githubRouter from "./routes/github.ts";
 
@@ -31,29 +32,7 @@ app.get("/static/*", serveStatic({ precompressed: true }));
 app.use("/static/*", serveStatic({ root: "./static" }));
 app.use("/favicon.ico", serveStatic({ path: "./static/favicon.ico" }));
 
-app.get(
-  "/",
-  describeRoute({
-    description: "Say hello to the user",
-    responses: {
-      200: {
-        description: "Successful greeting response",
-        content: {
-          "text/plain": {
-            schema: {
-              type: "string",
-              example: "Hello Hono!",
-            },
-          },
-        },
-      },
-    },
-  }),
-  (c) => {
-    return c.text("Hello Hono!");
-  },
-);
-
+app.route("/", defaultRouter);
 app.route("/auth", authRouter);
 
 app.get(
