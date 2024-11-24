@@ -5,7 +5,7 @@
     "test": "deno test --allow-env --env-file=.env.dev --watch",
     "coverage": "deno test  --allow-env --env-file=.env.dev --coverage --clean && deno coverage"
   },
-  "exclude": ["dist", "node_modules", "**/*.lock"],
+  "exclude": ["dist", "node_modules", "**/*.lock", ".github"],
   "fmt": {
     "useTabs": false,
     "lineWidth": 80,
