@@ -22,7 +22,7 @@ async function login(ctx: Context) {
   const user = users[0];
 
   const payload = {
-    sub: `${user.username}:${user.email}`,
+    sub: user.id,
     role: "user",
     exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // Token expires in 24 hours
   };
