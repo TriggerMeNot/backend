@@ -1,6 +1,7 @@
 import { Hono } from "@hono";
 import { describeRoute } from "@hono-openapi";
 import { resolver, validator } from "@hono-openapi/zod";
+import jwtMiddleware from "../middlewares/jwt.ts";
 import { githubAuth } from "@hono/oauth-providers/github";
 import GithubSchema from "../interfaces/github.ts";
 import GithubController from "../controllers/github.ts";
@@ -12,6 +13,8 @@ if (!Deno.env.get("GITHUB_ID") || !Deno.env.get("GITHUB_SECRET")) {
     "Please set the GITHUB_ID and GITHUB_SECRET environment variables",
   );
 }
+
+githubRouter.use("*", jwtMiddleware);
 
 githubRouter.use(
   "/",

@@ -5,18 +5,11 @@ import { prettyJSON } from "@hono/pretty-json";
 import { cors } from "@hono/cors";
 import { swaggerUI } from "@hono/swagger-ui";
 import { apiReference } from "@scalar/hono-api-reference";
-import { describeRoute, openAPISpecs } from "@hono-openapi";
+import { openAPISpecs } from "@hono-openapi";
 import { prometheus } from "@hono/prometheus";
-import { jwt } from "@hono/jwt";
 import defaultRouter from "./routes/default.ts";
 import authRouter from "./routes/auth.ts";
 import githubRouter from "./routes/github.ts";
-
-if (!Deno.env.has("JWT_SECRET") || !Deno.env.has("DATABASE_URL")) {
-  throw new Error(
-    "Please set the JWT_SECRET and DATABASE_URL environment variables",
-  );
-}
 
 const app = new Hono();
 
@@ -34,6 +27,7 @@ app.use("/favicon.ico", serveStatic({ path: "./static/favicon.ico" }));
 
 app.route("/", defaultRouter);
 app.route("/auth", authRouter);
+app.route("/github", githubRouter);
 
 app.get(
   "/openapi",
@@ -69,7 +63,7 @@ app.get(
 );
 
 app.get(
-  "doc",
+  "/doc",
   swaggerUI({
     url: "/openapi",
   }),
@@ -85,13 +79,5 @@ app.get(
 );
 
 app.get("/metrics", printMetrics);
-
-app.use(
-  "/*",
-  jwt({
-    secret: Deno.env.get("JWT_SECRET")!,
-  }),
-);
-app.route("/github", githubRouter);
 
 export default app;
