@@ -1,7 +1,7 @@
 {
   "tasks": {
-    "dev": "deno run --allow-env --env-file=.env.dev --allow-read --allow-net --watch app/main.ts",
-    "build": "deno compile --allow-env --allow-read --allow-net --output dist/app app/main.ts",
+    "dev": "deno run --allow-env --env-file=.env.dev --allow-read --allow-net --allow-ffi --watch app/main.ts",
+    "build": "deno compile --allow-env --allow-read --allow-net --allow-ffi --output dist/app app/main.ts",
     "test": "deno test --allow-env --env-file=.env.dev --watch",
     "coverage": "deno test  --allow-env --env-file=.env.dev --coverage --clean && deno coverage"
   },
@@ -27,6 +27,7 @@
     "@scalar/hono-api-reference": "npm:@scalar/hono-api-reference@^0.5.159",
     "@std/assert": "jsr:@std/assert@^1.0.8",
     "@types/pg": "npm:@types/pg@^8.11.10",
+    "bcrypt": "npm:bcrypt@^5.1.1",
     "drizzle-kit": "npm:drizzle-kit@^0.28.1",
     "drizzle-orm": "npm:drizzle-orm@^0.36.3",
     "pg": "npm:pg@^8.13.1",
