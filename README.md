@@ -39,19 +39,16 @@ Comparison with Node.js and Bun:
 - Middleware support
 - Build with web standards
 
-Comparison with Oak and Drash:
+Comparison with FastAPI and NestJS:
 
-| Hono                     | Oak                      | Drash                    |
-| ------------------------ | ------------------------ | ------------------------ |
-| Fast and lightweight     | Fast and lightweight     | Fast and lightweight     |
-| Easy to use              | Easy to use              | Easy to use              |
-| Middleware support       | Middleware support       | Middleware support       |
-| Build with web standards | Build with web standards | Build with web standards |
-| Built-in validation      | Requires external tools  | Requires external tools  |
-| Best performance         | Good performance         | Good performance         |
-
-> [!NOTE]
-> Nestjs is not used because it depends on other framework (Express or Fastify).
+| Hono                     | FastAPI                      | NestJS                       |
+| ------------------------ | ---------------------------- | ---------------------------- |
+| TypeScript (any Runtime) | Python                       | TypeScript (Node.js Runtime) |
+| Fast and lightweight     | Fast and lightweight         | Fast and lightweight         |
+| Easy to use              | Easy to use                  | Not easy but not hard to use |
+| Advanced Middleware      | Limited Middleware           | Advanced Middleware          |
+| Own library              | Own library                  | Express or Fastify           |
+| Built with web standards | Not built with web standards | Not built with web standards |
 
 [![Drizzle](https://img.shields.io/badge/drizzle-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black)](https://orm.drizzle.team/)
 
