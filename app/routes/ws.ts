@@ -2,14 +2,23 @@ import { Hono } from "@hono";
 import { describeRoute } from "@hono-openapi";
 import { upgradeWebSocket } from "@hono/deno";
 import { Context } from "@hono";
+import { verify } from "@hono/jwt";
 
 const wsRouter = new Hono();
-const connections = new Set<WebSocket>();
+const connections = new Map<WebSocket, { clientId: string }>();
 
 const broadcast = (message: string) => {
-  connections.forEach((socket) => {
+  connections.forEach((_, socket) => {
     if (socket.readyState === WebSocket.OPEN) {
       socket.send(message);
+    }
+  });
+};
+
+export const sendData = (clientId: string, data: string) => {
+  connections.forEach((value, socket) => {
+    if (value.clientId === clientId && socket.readyState === WebSocket.OPEN) {
+      socket.send(data);
     }
   });
 };
@@ -18,7 +27,8 @@ wsRouter.get(
   "/",
   describeRoute({
     tags: ["websocket"],
-    description: "Establish a WebSocket connection for bidirectional communication.",
+    description:
+      "Establish a WebSocket connection for bidirectional communication.",
     responses: {
       101: {
         description: "WebSocket connection established",
@@ -33,23 +43,26 @@ wsRouter.get(
       },
     },
   }),
-  upgradeWebSocket((c: Context) => {
-    // Access headers correctly using c.req.raw, which should be the raw request object
-    const headers = c.req.raw.headers;
+  upgradeWebSocket(async (c: Context) => {
+    const token = c.req.query("token");
 
-    // Check for WebSocket upgrade request by looking for correct headers
-    if (
-      headers.get("upgrade")?.toLowerCase() === "websocket" &&
-      headers.get("connection")?.toLowerCase() === "upgrade"
-    ) {
-      // Proceed to upgrade to WebSocket
+    if (!token) {
+      console.error("Token is missing");
+      return {
+        onMessage: () => {},
+        onClose: () => {},
+        onError: () => {},
+      };
+    }
+
+    try {
+      const payload = await verify(token, Deno.env.get("JWT_SECRET")!);
+      console.log("Authenticated with payload:", payload);
+
       const { socket, response } = Deno.upgradeWebSocket(c.req.raw);
 
-      // WebSocket events handler
-      socket.onopen = () => {
-        console.log("WebSocket connection opened");
-        connections.add(socket);
-      };
+      const clientId = payload.sub as string;
+      connections.set(socket, { clientId });
 
       socket.onmessage = (event) => {
         console.log(`Received message: ${event.data}`);
@@ -81,8 +94,8 @@ wsRouter.get(
         onClose: socket.onclose,
         onError: socket.onerror,
       };
-    } else {
-      // Return 400 if not a valid WebSocket upgrade request
+    } catch (err) {
+      console.error("Authentication failed:", err);
       return {
         onMessage: () => {},
         onClose: () => {},
