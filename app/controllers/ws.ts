@@ -4,7 +4,7 @@ import { verify } from "@hono/jwt";
 const connections = new Map<WebSocket, { clientId: string }>();
 
 // Broadcast a message to all connected clients
-const broadcast = (message: string) => {
+function broadcast(message: string) {
   connections.forEach((_, socket) => {
     if (socket.readyState === WebSocket.OPEN) {
       socket.send(message);
@@ -13,7 +13,7 @@ const broadcast = (message: string) => {
 };
 
 // Send data to only one client based on its id
-const sendData = (clientId: string, data: string) => {
+function sendData(clientId: string, data: string) {
   connections.forEach((value, socket) => {
     if (value.clientId === clientId && socket.readyState === WebSocket.OPEN) {
       socket.send(data);
@@ -22,7 +22,7 @@ const sendData = (clientId: string, data: string) => {
 };
 
 // WebSocket connection handler with authentication and message handling
-const handleWebSocket = async (c: Context) => {
+async function handleWebSocket(c: Context) {
   const token = c.req.query("token");
 
   if (!token) {
@@ -71,7 +71,7 @@ const handleWebSocket = async (c: Context) => {
   }
 };
 
-export {
+export default {
     broadcast,
     sendData,
     handleWebSocket,

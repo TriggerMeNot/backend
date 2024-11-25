@@ -1,7 +1,7 @@
 import { Hono } from "@hono";
 import { describeRoute } from "@hono-openapi";
 import { upgradeWebSocket } from "@hono/deno";
-import { handleWebSocket } from "../controllers/ws.ts";
+import wsController from "../controllers/ws.ts";
 
 const wsRouter = new Hono();
 
@@ -25,7 +25,7 @@ wsRouter.get(
       },
     },
   }),
-  upgradeWebSocket(handleWebSocket),
+  upgradeWebSocket(wsController.handleWebSocket),
 );
 
 export default wsRouter;
