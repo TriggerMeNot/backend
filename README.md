@@ -100,6 +100,10 @@ docker compose -f compose.yml up -d
 ```
 
 ```bash
+deno install --allow-scripts=npm:bcrypt@5.1.1
+```
+
+```bash
 deno -A npm:drizzle-kit generate
 ```
 
