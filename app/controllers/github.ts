@@ -4,6 +4,13 @@ import { db } from "../db/config.ts";
 import { eq } from "drizzle-orm/expressions";
 import { users as userSchema } from "../schemas/users.ts";
 import { oauths as oauthSchema } from "../schemas/oauths.ts";
+import { services as serviceSchema } from "../schemas/services.ts";
+
+const SERVICE_NAME = "GitHub";
+
+await db.insert(serviceSchema).values({
+  name: SERVICE_NAME,
+}).onConflictDoNothing();
 
 async function callback(ctx: Context) {
   const token = ctx.get("token") as unknown;
@@ -23,15 +30,22 @@ async function callback(ctx: Context) {
   } else {
     return await login(ctx);
   }
+
   const userId = parseInt(payload.sub as string);
 
-  const serviceId = 1;
+  const services = await db.select().from(serviceSchema).where(
+    eq(serviceSchema.name, SERVICE_NAME),
+  ).limit(1);
+  if (!services.length) {
+    return ctx.json({ error: "Service not found" }, 404);
+  }
+  const serviceId = services[0].id;
 
   await db.insert(oauthSchema).values({
-    userId: (userId as number),
-    serviceId: (serviceId as number),
-    token: (token as string),
-    refreshToken: (refreshToken as string),
+    userId: userId,
+    serviceId: serviceId,
+    token: token as string,
+    refreshToken: refreshToken as string,
   });
 
   return ctx.json({
