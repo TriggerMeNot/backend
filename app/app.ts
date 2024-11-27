@@ -11,15 +11,18 @@ import defaultRouter from "./routes/default.ts";
 import authRouter from "./routes/auth.ts";
 import githubRouter from "./routes/github.ts";
 
-const app = new Hono();
-
-const { printMetrics, registerMetrics } = prometheus();
+const app = new Hono().basePath("/api");
 
 app.use("*", logger());
 app.use("*", prettyJSON());
-app.use("*", registerMetrics);
+app.use("*", cors());
 
-app.use("/api/*", cors());
+{
+  const { printMetrics, registerMetrics } = prometheus();
+
+  app.use("*", registerMetrics);
+  app.get("/metrics", printMetrics);
+}
 
 app.get("/static/*", serveStatic({ precompressed: true }));
 app.use("/static/*", serveStatic({ root: "./static" }));
@@ -65,7 +68,7 @@ app.get(
 app.get(
   "/doc",
   swaggerUI({
-    url: "/openapi",
+    url: "/api/openapi",
   }),
 );
 app.get(
@@ -73,11 +76,9 @@ app.get(
   apiReference({
     theme: "saturn",
     spec: {
-      url: "/openapi",
+      url: "/api/openapi",
     },
   }),
 );
-
-app.get("/metrics", printMetrics);
 
 export default app;
