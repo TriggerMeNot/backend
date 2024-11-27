@@ -38,12 +38,14 @@ async function register(ctx: Context) {
   // @ts-ignore - The `form` validator is added by the `validator` middleware
   const { email, username, password } = ctx.req.valid("form");
 
-  const users = await db.select().from(userSchema).where(
-    eq(userSchema.email, email),
-  ).limit(1);
+  {
+    const users = await db.select().from(userSchema).where(
+      eq(userSchema.email, email),
+    ).limit(1);
 
-  if (users.length) {
-    return ctx.json({ message: "User already exists" }, 400);
+    if (!users) {
+      return ctx.json({ message: "User already exists" }, 400);
+    }
   }
 
   const hashedPassword = await bcrypt.hash(
@@ -51,12 +53,26 @@ async function register(ctx: Context) {
     parseInt(Deno.env.get("SALT_ROUNDS")!),
   );
 
-  await db.insert(userSchema).values({
+  const users = await db.insert(userSchema).values({
     email,
     username,
     password: hashedPassword,
-  });
-  return ctx.json({ email, username });
+  }).returning();
+
+  if (!users) {
+    return ctx.json({ message: "Unable to create user" }, 401);
+  }
+
+  const user = users[0];
+
+  const payload = {
+    sub: user.id,
+    role: "user",
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // Token expires in 24 hours
+  };
+
+  const token = await sign(payload, Deno.env.get("JWT_SECRET")!);
+  return ctx.json({ token });
 }
 
 export default {
