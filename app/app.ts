@@ -29,8 +29,8 @@ app.use("/static/*", serveStatic({ root: "./static" }));
 app.use("/favicon.ico", serveStatic({ path: "./static/favicon.ico" }));
 
 app.route("/", defaultRouter);
+authRouter.route("/github", githubRouter);
 app.route("/auth", authRouter);
-app.route("/github", githubRouter);
 
 app.get(
   "/openapi",
