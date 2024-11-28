@@ -1,47 +1,24 @@
 import { Hono } from "@hono";
 import { describeRoute } from "@hono-openapi";
-import { resolver, validator } from "@hono-openapi/zod";
-import { githubAuth } from "@hono/oauth-providers/github";
+import { validator } from "@hono-openapi/zod";
 import GithubSchema from "../interfaces/github.ts";
 import GithubController from "../controllers/github.ts";
 
 const githubRouter = new Hono();
 
-if (!Deno.env.get("GITHUB_ID") || !Deno.env.get("GITHUB_SECRET")) {
-  throw new Error(
-    "Please set the GITHUB_ID and GITHUB_SECRET environment variables",
-  );
-}
-
-githubRouter.use(
-  "*",
-  githubAuth({
-    client_id: Deno.env.get("GITHUB_ID"),
-    client_secret: Deno.env.get("GITHUB_SECRET"),
-    scope: ["public_repo", "read:user", "user", "user:email", "user:follow"],
-    oauthApp: true,
-  }),
-);
-
-githubRouter.get(
+githubRouter.post(
   "/",
   describeRoute({
     tags: ["github"],
-    description:
-      "Callback for Github OAuth, Login or Register when no Bearer token is provided",
+    description: "Save github token for the user.",
     responses: {
       200: {
-        description: "Successful Github OAuth response",
-        content: {
-          "application/json": {
-            schema: resolver(GithubSchema.Github.Response),
-          },
-        },
+        description: "Successful response",
       },
     },
   }),
-  validator("query", GithubSchema.Github.Query),
-  GithubController.callback,
+  validator("form", GithubSchema.Github.Body),
+  GithubController.setToken,
 );
 
 export default githubRouter;

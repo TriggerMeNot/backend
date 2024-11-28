@@ -13,14 +13,14 @@ import githubRouter from "./routes/github.ts";
 
 const app = new Hono().basePath("/api");
 
-app.use("*", logger());
-app.use("*", prettyJSON());
-app.use("*", cors());
+app.use(logger());
+app.use(prettyJSON());
+app.use(cors());
 
 {
   const { printMetrics, registerMetrics } = prometheus();
 
-  app.use("*", registerMetrics);
+  app.use(registerMetrics);
   app.get("/metrics", printMetrics);
 }
 
