@@ -62,7 +62,7 @@ authRouter.use(jwtMiddleware);
 authRouter.post(
   "/github",
   describeRoute({
-    tags: ["github"],
+    tags: ["auth", "github"],
     description: "Login to get Github access",
     responses: {
       200: {
