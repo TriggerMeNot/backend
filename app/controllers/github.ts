@@ -10,12 +10,39 @@ await db.insert(serviceSchema).values({
   name: SERVICE_NAME,
 }).onConflictDoNothing();
 
-async function setToken(ctx: Context) {
-  // @ts-ignore - The `form` validator is added by the `validator` middleware
-  const { token, refreshToken } = ctx.req.valid("form");
+async function root(ctx: Context) {
+  // @ts-ignore - The `json` validator is added by the `validator` middleware
+  const { code } = ctx.req.valid("json");
 
-  const jwtPayload = ctx.get("jwtPayload");
-  const userId = parseInt(jwtPayload.sub);
+  const response = await fetch(
+    `https://github.com/login/oauth/access_token`,
+    {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        client_id: Deno.env.get("GITHUB_ID")!,
+        client_secret: Deno.env.get("GITHUB_SECRET")!,
+        code,
+      }),
+    },
+  );
+
+  const data = await response.json();
+
+  if ("error" in data) {
+    return ctx.json(data, 400);
+  }
+
+  const actualTime = new Date().getUTCSeconds();
+  const {
+    access_token: token,
+    expires_in: tokenExpiresIn,
+    refresh_token: refreshToken,
+    refresh_token_expires_at: refreshTokenExpiresIn,
+  } = data;
 
   const services = await db.select().from(serviceSchema).where(
     eq(serviceSchema.name, SERVICE_NAME),
@@ -25,11 +52,16 @@ async function setToken(ctx: Context) {
   }
   const serviceId = services[0].id;
 
+  const jwtPayload = ctx.get("jwtPayload");
+  const userId = parseInt(jwtPayload.sub);
+
   await db.insert(oauthSchema).values({
-    userId: userId,
-    serviceId: serviceId,
-    token: token,
-    refreshToken: refreshToken,
+    userId,
+    serviceId,
+    token,
+    tokenExpiresAt: actualTime + tokenExpiresIn,
+    refreshToken,
+    refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
   }).onConflictDoUpdate({
     target: oauthSchema.id,
     set: {
@@ -37,10 +69,12 @@ async function setToken(ctx: Context) {
       refreshToken: refreshToken,
     },
     setWhere: and(
-      eq(oauthSchema.token, token),
-      eq(oauthSchema.refreshToken, refreshToken),
+      eq(oauthSchema.userId, userId),
+      eq(oauthSchema.serviceId, serviceId),
     ),
   });
+
+  return ctx.json({ message: "Success" }, 200);
 }
 
-export default { setToken };
+export default { root };

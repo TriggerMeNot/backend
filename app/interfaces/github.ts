@@ -2,10 +2,9 @@ import z from "zod";
 import "zod-openapi/extend";
 
 export default {
-  Github: {
+  Root: {
     Body: z.object({
-      token: z.string(),
-      refreshToken: z.string(),
+      code: z.string(),
     }),
   },
 };

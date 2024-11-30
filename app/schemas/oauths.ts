@@ -7,5 +7,7 @@ export const oauths = pgTable("oauths", {
   userId: integer("user_id").notNull().references(() => users.id),
   serviceId: integer("service_id").notNull().references(() => services.id),
   token: text("token").notNull(),
-  refreshToken: text("refresh_token"),
+  tokenExpiresAt: integer("token_expires_at").notNull(),
+  refreshToken: text("refresh_token").notNull(),
+  refreshTokenExpiresAt: integer("refresh_token_expires_at").notNull(),
 });

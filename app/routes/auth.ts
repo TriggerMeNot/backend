@@ -59,16 +59,16 @@ authRouter.post(
 authRouter.post(
   "/github",
   describeRoute({
-    tags: ["auth"],
-    description: "Save github token for the user.",
+    tags: ["github"],
+    description: "Login to get Github access",
     responses: {
       200: {
         description: "Successful response",
       },
     },
   }),
-  validator("form", GithubSchema.Github.Body),
-  GithubController.setToken,
+  validator("json", GithubSchema.Root.Body),
+  GithubController.root,
 );
 
 export default authRouter;
