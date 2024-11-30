@@ -4,6 +4,10 @@ import { and, eq } from "drizzle-orm/expressions";
 import { oauths as oauthSchema } from "../schemas/oauths.ts";
 import { services as serviceSchema } from "../schemas/services.ts";
 
+if (!Deno.env.get("GITHUB_ID") || !Deno.env.get("GITHUB_SECRET")) {
+  throw new Error("GitHub OAuth credentials not found");
+}
+
 const SERVICE_NAME = "GitHub";
 
 await db.insert(serviceSchema).values({
