@@ -1,4 +1,4 @@
-# AREA Server
+# TriggerMeNot Server
 
 ## Tech Stack
 

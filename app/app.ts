@@ -39,9 +39,9 @@ app.get(
   openAPISpecs(app as unknown as Hono, {
     documentation: {
       info: {
-        title: "AREA API",
+        title: "TriggerMeNot API",
         version: "1.0.0",
-        description: "API for Actions, REActions",
+        description: "API for TriggerMeNot",
       },
       components: {
         securitySchemes: {
