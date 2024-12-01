@@ -173,6 +173,7 @@ Reactions {
     int id
     int serviceId
     string name
+    string description
 }
 Reactions |o--|| Services : use
 
