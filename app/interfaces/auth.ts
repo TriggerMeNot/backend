@@ -19,8 +19,7 @@ export default {
       password: z.string(),
     }),
     Response: z.object({
-      email: z.string().email(),
-      username: z.string(),
+      token: z.string(),
     }),
   },
 };

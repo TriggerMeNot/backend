@@ -5,65 +5,43 @@ import { prettyJSON } from "@hono/pretty-json";
 import { cors } from "@hono/cors";
 import { swaggerUI } from "@hono/swagger-ui";
 import { apiReference } from "@scalar/hono-api-reference";
-import { describeRoute, openAPISpecs } from "@hono-openapi";
+import { openAPISpecs } from "@hono-openapi";
 import { prometheus } from "@hono/prometheus";
+import defaultRouter from "./routes/default.ts";
+import authRouter from "./routes/auth.ts";
+import userRouter from "./routes/user.ts";
+import githubRouter from "./routes/github.ts";
 
-if (!Deno.env.has("JWT_SECRET")) {
-  console.error("JWT_SECRET is not set");
-  Deno.exit(1);
+const app = new Hono().basePath("/api");
+
+app.use(logger());
+app.use(prettyJSON());
+app.use(cors());
+
+{
+  const { printMetrics, registerMetrics } = prometheus();
+
+  app.use(registerMetrics);
+  app.get("/metrics", printMetrics);
 }
-
-const app = new Hono();
-
-const { printMetrics, registerMetrics } = prometheus();
-
-app.use("*", logger());
-app.use("*", prettyJSON());
-app.use("*", registerMetrics);
-
-app.use("/api/*", cors());
 
 app.get("/static/*", serveStatic({ precompressed: true }));
 app.use("/static/*", serveStatic({ root: "./static" }));
 app.use("/favicon.ico", serveStatic({ path: "./static/favicon.ico" }));
 
-app.get(
-  "/",
-  describeRoute({
-    description: "Say hello to the user",
-    responses: {
-      200: {
-        description: "Successful greeting response",
-        content: {
-          "text/plain": {
-            schema: {
-              type: "string",
-              example: "Hello Hono!",
-            },
-          },
-        },
-      },
-    },
-  }),
-  (c) => {
-    return c.text("Hello Hono!");
-  },
-);
-
-import wsRouter from "./routes/ws.ts";
-app.route("/ws", wsRouter);
-
-import authRouter from "./routes/auth.ts";
+app.route("/", defaultRouter);
 app.route("/auth", authRouter);
+app.route("/user", userRouter);
+app.route("/github", githubRouter);
 
 app.get(
   "/openapi",
   openAPISpecs(app as unknown as Hono, {
     documentation: {
       info: {
-        title: "AREA API",
+        title: "TriggerMeNot API",
         version: "1.0.0",
-        description: "API for Actions, REActions",
+        description: "API for TriggerMeNot",
       },
       components: {
         securitySchemes: {
@@ -90,9 +68,9 @@ app.get(
 );
 
 app.get(
-  "doc",
+  "/doc",
   swaggerUI({
-    url: "/openapi",
+    url: "/api/openapi",
   }),
 );
 app.get(
@@ -100,11 +78,9 @@ app.get(
   apiReference({
     theme: "saturn",
     spec: {
-      url: "/openapi",
+      url: "/api/openapi",
     },
   }),
 );
-
-app.get("/metrics", printMetrics);
 
 export default app;
