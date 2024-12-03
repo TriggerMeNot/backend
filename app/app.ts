@@ -10,7 +10,8 @@ import { prometheus } from "@hono/prometheus";
 import defaultRouter from "./routes/default.ts";
 import authRouter from "./routes/auth.ts";
 import userRouter from "./routes/user.ts";
-import linkRouter from "./routes/link.ts";
+import playgroundRouter from "./routes/playground.ts";
+import triggerMeNotRouter from "./routes/triggerMeNot.ts";
 import githubRouter from "./routes/github.ts";
 
 const app = new Hono().basePath("/api");
@@ -33,7 +34,8 @@ app.use("/favicon.ico", serveStatic({ path: "./static/favicon.ico" }));
 app.route("/", defaultRouter);
 app.route("/auth", authRouter);
 app.route("/user", userRouter);
-app.route("/link", linkRouter);
+app.route("/playground", playgroundRouter);
+app.route("/triggerMeNot", triggerMeNotRouter);
 app.route("/github", githubRouter);
 
 app.get(

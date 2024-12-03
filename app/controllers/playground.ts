@@ -6,6 +6,31 @@ import { reactionsPlayground as reactionsPlaygroundSchema } from "../schemas/rea
 import { actionLinks as actionLinkSchema } from "../schemas/actionLinks.ts";
 import { reactionLinks as reactionLinkSchema } from "../schemas/reactionLinks.ts";
 
+async function addReaction(ctx: Context) {
+  // @ts-ignore - The `json` validator is added by the `validator` middleware
+  const { playgroundId, reactionId } = ctx.req.valid("json");
+
+  await db.insert(reactionsPlaygroundSchema).values({
+    playgroundId,
+    reactionId,
+  });
+
+  return ctx.json({ success: true }, 201);
+}
+
+async function addAction(ctx: Context) {
+  // @ts-ignore - The `json` validator is added by the `validator` middleware
+  const { playgroundId, actionId, settings } = ctx.req.valid("json");
+
+  await db.insert(actionsPlaygroundSchema).values({
+    playgroundId,
+    actionId,
+    settings,
+  });
+
+  return ctx.json({ success: true }, 201);
+}
+
 async function link(ctx: Context) {
   // @ts-ignore - The `json` validator is added by the `validator` middleware
   const { triggerType, triggerId, actionId } = ctx.req.valid("json");
@@ -66,4 +91,4 @@ async function link(ctx: Context) {
   return ctx.json({ success: true }, 201);
 }
 
-export default { link };
+export default { addReaction, addAction, link };
