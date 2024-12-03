@@ -1,5 +1,7 @@
 FROM denoland/deno:2.0.2
 
+ENV PORT=80
+
 WORKDIR /app
 
 COPY deno.json .
@@ -8,13 +10,10 @@ COPY app ./app
 
 RUN deno task build
 
-RUN rm deno.json
-RUN rm deno.lock
-RUN rm -rf app
-
-RUN mv dist/app .
-RUN rm -rf dist
+COPY drizzle.config.ts .
 
 COPY static ./static
 
-CMD [ "./app" ]
+ENTRYPOINT deno -A npm:drizzle-kit generate && \
+           deno -A npm:drizzle-kit migrate && \
+           ./dist/app
