@@ -10,10 +10,6 @@ if (!Deno.env.get("GITHUB_ID") || !Deno.env.get("GITHUB_SECRET")) {
 
 const SERVICE_NAME = "GitHub";
 
-await db.insert(serviceSchema).values({
-  name: SERVICE_NAME,
-}).onConflictDoNothing();
-
 async function root(ctx: Context) {
   // @ts-ignore - The `json` validator is added by the `validator` middleware
   const { code } = ctx.req.valid("json");
