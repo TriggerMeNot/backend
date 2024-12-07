@@ -2,7 +2,7 @@
   "tasks": {
     "dev": "deno run --allow-env --env-file=.env.dev --allow-read --allow-net --allow-ffi --watch app/main.ts",
     "start": "deno run --allow-env --env-file=.env.prod --allow-read --allow-net --allow-ffi app/main.ts",
-    "test": "deno test --allow-env --env-file=.env.dev --watch",
+    "test": "deno test --allow-env --env-file=.env.dev --allow-net --watch",
     "coverage": "deno test  --allow-env --env-file=.env.dev --coverage --clean && deno coverage"
   },
   "exclude": ["dist", "node_modules", "**/*.lock", ".github"],
