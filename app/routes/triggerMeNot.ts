@@ -10,7 +10,7 @@ const triggerMeNotRouter = new Hono();
 triggerMeNotRouter.use(jwtMiddleware);
 
 triggerMeNotRouter.post(
-  "/OnFetch",
+  "/on-fetch",
   describeRoute({
     tags: ["triggerMeNot"],
     description: "React to a fetch event",
