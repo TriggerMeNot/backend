@@ -38,7 +38,7 @@ app.route("/", defaultRouter);
 app.route("/auth", authRouter);
 app.route("/user", userRouter);
 app.route("/playground", playgroundRouter);
-app.route("/triggerMeNot", triggerMeNotRouter);
+app.route("/trigger-me-not", triggerMeNotRouter);
 app.route("/github", githubRouter);
 
 app.get(
