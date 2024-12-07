@@ -8,6 +8,7 @@
     "npm:@hono/swagger-ui@~0.4.1": "0.4.1_hono@4.6.10",
     "npm:@scalar/hono-api-reference@~0.5.159": "0.5.159_hono@4.6.10",
     "npm:@types/pg@^8.11.10": "8.11.10",
+    "npm:drizzle-kit@*": "0.28.1_esbuild@0.19.12",
     "npm:drizzle-kit@~0.28.1": "0.28.1_esbuild@0.19.12",
     "npm:drizzle-orm@~0.36.3": "0.36.4_@types+pg@8.11.10_pg@8.13.1",
     "npm:hono-openapi@~0.1.5": "0.1.5_@hono+zod-validator@0.4.1__hono@4.6.10__zod@3.23.8_hono@4.6.10_openapi-types@12.1.3_zod@3.23.8_zod-openapi@3.3.0__zod@3.23.8",
@@ -520,7 +521,8 @@
     "https://deno.land/x/bcrypt@v0.4.1/mod.ts": "ff09bdae282583cf5f7d87efe37ddcecef7f14f6d12e8b8066a3058db8c6c2f7",
     "https://deno.land/x/bcrypt@v0.4.1/src/bcrypt/base64.ts": "b8266450a4f1eb6960f60f2f7986afc4dde6b45bd2d7ee7ba10789e67e17b9f7",
     "https://deno.land/x/bcrypt@v0.4.1/src/bcrypt/bcrypt.ts": "ec221648cc6453ea5e3803bc817c01157dada06aa6f7a0ba6b9f87aae32b21e2",
-    "https://deno.land/x/bcrypt@v0.4.1/src/main.ts": "08d201b289c8d9c46f8839c69cd6625b213863db29775c7a200afc3b540e64f8"
+    "https://deno.land/x/bcrypt@v0.4.1/src/main.ts": "08d201b289c8d9c46f8839c69cd6625b213863db29775c7a200afc3b540e64f8",
+    "https://deno.land/x/bcrypt@v0.4.1/src/worker.ts": "5a73bdfee9c9e622f47c9733d374b627dce52fb3ec1e74c8226698b3fc57ffac"
   },
   "workspace": {
     "dependencies": [

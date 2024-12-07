@@ -10,11 +10,18 @@ interface FetchSettings {
 async function fetchRequest(action: ActionTrigger) {
   const settings = action.settings as FetchSettings;
 
-  await fetch(settings.url, {
+  const fetchOptions: RequestInit = {
     method: settings.method,
     headers: settings.headers,
-    body: settings.body,
-  });
+  };
+
+  if (settings.method !== "GET" && settings.method !== "HEAD") {
+    fetchOptions.body = settings.body;
+  }
+
+  const response = await fetch(settings.url, fetchOptions);
+  await response.text(); // Consume the response body
+  return response;
 }
 
 export default {
