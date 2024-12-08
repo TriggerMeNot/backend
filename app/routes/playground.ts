@@ -9,6 +9,38 @@ const playgroundRouter = new Hono();
 
 playgroundRouter.use(jwtMiddleware);
 
+playgroundRouter.get(
+  "/",
+  describeRoute({
+    tags: ["playground"],
+    description: "Get all playgrounds",
+    responses: {
+      200: {
+        description: "Successful playground response",
+      },
+    },
+  }),
+  playgroundController.list,
+);
+
+playgroundRouter.post(
+  "/",
+  describeRoute({
+    tags: ["playground"],
+    description: "Create a playground",
+    responses: {
+      201: {
+        description: "Successful playground response",
+      },
+      400: {
+        description: "Bad request",
+      },
+    },
+  }),
+  validator("json", PlaygroundSchema.Create.Body),
+  playgroundController.create,
+);
+
 playgroundRouter.post(
   "/action",
   describeRoute({

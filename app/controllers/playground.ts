@@ -1,10 +1,35 @@
 import { Context } from "@hono";
 import { db } from "../db/config.ts";
 import { eq } from "drizzle-orm/expressions";
+import { playgrounds as playgroundSchema } from "../schemas/playgrounds.ts";
 import { actionsPlayground as actionsPlaygroundSchema } from "../schemas/actionsPlayground.ts";
 import { reactionsPlayground as reactionsPlaygroundSchema } from "../schemas/reactionsPlayground.ts";
 import { actionLinks as actionLinkSchema } from "../schemas/actionLinks.ts";
 import { reactionLinks as reactionLinkSchema } from "../schemas/reactionLinks.ts";
+
+async function list(ctx: Context) {
+  const userId = ctx.get("jwtPayload").sub;
+
+  const playgrounds = await db.select().from(playgroundSchema).where(
+    eq(playgroundSchema.userId, userId),
+  );
+
+  return ctx.json(playgrounds);
+}
+
+async function create(ctx: Context) {
+  // @ts-ignore - The `json` validator is added by the `validator` middleware
+  const { name } = ctx.req.valid("json");
+
+  const userId = ctx.get("jwtPayload").sub;
+
+  const playground = await db.insert(playgroundSchema).values({
+    userId,
+    name,
+  }).returning();
+
+  return ctx.json(playground[0], 201);
+}
 
 async function addReaction(ctx: Context) {
   // @ts-ignore - The `json` validator is added by the `validator` middleware
@@ -91,4 +116,4 @@ async function link(ctx: Context) {
   return ctx.json({ success: true }, 201);
 }
 
-export default { addReaction, addAction, link };
+export default { list, create, addReaction, addAction, link };
