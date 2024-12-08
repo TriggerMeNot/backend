@@ -10,6 +10,17 @@ export default {
       actions: z.array(z.number()),
     }),
   },
+  Get: {
+    Param: z.object({
+      id: z.string(),
+    }),
+    Response: z.object({
+      id: z.number(),
+      name: z.string(),
+      reactions: z.array(z.number()),
+      actions: z.array(z.number()),
+    }),
+  },
   Create: {
     Body: z.object({
       name: z.string().min(2),

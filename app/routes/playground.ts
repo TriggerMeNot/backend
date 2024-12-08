@@ -41,6 +41,24 @@ playgroundRouter.post(
   playgroundController.create,
 );
 
+playgroundRouter.get(
+  "/:id",
+  describeRoute({
+    tags: ["playground"],
+    description: "Get a playground by ID",
+    responses: {
+      200: {
+        description: "Successful playground response",
+      },
+      404: {
+        description: "Not found",
+      },
+    },
+  }),
+  validator("param", PlaygroundSchema.Get.Param),
+  playgroundController.get,
+);
+
 playgroundRouter.post(
   "/action",
   describeRoute({
