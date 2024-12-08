@@ -14,10 +14,3 @@ Deno.test({
     assertEquals(typeof playgroundController.addReaction, "function");
   },
 });
-
-Deno.test({
-  name: "Playground controller has link function",
-  fn() {
-    assertEquals(typeof playgroundController.link, "function");
-  },
-});

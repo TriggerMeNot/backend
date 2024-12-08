@@ -7,7 +7,7 @@ export const actions = pgTable(
     id: serial("id").primaryKey().notNull(),
     serviceId: integer("service_id")
       .notNull()
-      .references(() => services.id),
+      .references(() => services.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     description: text("description").notNull(),
   },

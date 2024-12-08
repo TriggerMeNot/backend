@@ -125,12 +125,16 @@ async function deleteAction(ctx: Context) {
   const playgroundId = parseInt(playgroundIdString);
   const actionId = parseInt(actionIdString);
 
-  await db.delete(actionPlaygroundSchema).where(
+  const deleted = await db.delete(actionPlaygroundSchema).where(
     and(
       eq(actionPlaygroundSchema.id, actionId),
       eq(actionPlaygroundSchema.playgroundId, playgroundId),
     ),
   );
+
+  if (deleted.rowCount === 0) {
+    return ctx.json({ error: "Action not found" }, 404);
+  }
 
   return ctx.json({ success: true });
 }
@@ -174,12 +178,16 @@ async function deleteReaction(ctx: Context) {
   const playgroundId = parseInt(playgroundIdString);
   const reactionId = parseInt(reactionIdString);
 
-  await db.delete(reactionPlaygroundSchema).where(
+  const deleted = await db.delete(reactionPlaygroundSchema).where(
     and(
       eq(reactionPlaygroundSchema.id, reactionId),
       eq(reactionPlaygroundSchema.playgroundId, playgroundId),
     ),
   );
+
+  if (deleted.rowCount === 0) {
+    return ctx.json({ error: "Reaction not found" }, 404);
+  }
 
   return ctx.json({ success: true });
 }
