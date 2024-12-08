@@ -1,6 +1,6 @@
 import { Context } from "@hono";
 import { db } from "../db/config.ts";
-import { eq } from "drizzle-orm/expressions";
+import { and, eq } from "drizzle-orm/expressions";
 import { playgrounds as playgroundSchema } from "../schemas/playgrounds.ts";
 import { actions as actionSchema } from "../schemas/actions.ts";
 import { reactionsPlayground as reactionPlaygroundSchema } from "../schemas/reactionsPlayground.ts";
@@ -111,6 +111,30 @@ async function addAction(ctx: Context) {
   );
 }
 
+async function deleteAction(ctx: Context) {
+  const { playgroundId: playgroundIdString, actionId: actionIdString } = ctx
+    .req.valid("param" as never);
+
+  if (isNaN(parseInt(playgroundIdString))) {
+    return ctx.json({ error: "Invalid playground ID" }, 400);
+  }
+  if (isNaN(parseInt(actionIdString))) {
+    return ctx.json({ error: "Invalid action ID" }, 400);
+  }
+
+  const playgroundId = parseInt(playgroundIdString);
+  const actionId = parseInt(actionIdString);
+
+  await db.delete(actionPlaygroundSchema).where(
+    and(
+      eq(actionPlaygroundSchema.id, actionId),
+      eq(actionPlaygroundSchema.playgroundId, playgroundId),
+    ),
+  );
+
+  return ctx.json({ success: true });
+}
+
 async function addReaction(ctx: Context) {
   const { playgroundId: playgroundIdString, reactionId: reactionIdString } = ctx
     .req
@@ -134,6 +158,30 @@ async function addReaction(ctx: Context) {
   });
 
   return ctx.json({ success: true }, 201);
+}
+
+async function deleteReaction(ctx: Context) {
+  const { playgroundId: playgroundIdString, reactionId: reactionIdString } = ctx
+    .req.valid("param" as never);
+
+  if (isNaN(parseInt(playgroundIdString))) {
+    return ctx.json({ error: "Invalid playground ID" }, 400);
+  }
+  if (isNaN(parseInt(reactionIdString))) {
+    return ctx.json({ error: "Invalid reaction ID" }, 400);
+  }
+
+  const playgroundId = parseInt(playgroundIdString);
+  const reactionId = parseInt(reactionIdString);
+
+  await db.delete(reactionPlaygroundSchema).where(
+    and(
+      eq(reactionPlaygroundSchema.id, reactionId),
+      eq(reactionPlaygroundSchema.playgroundId, playgroundId),
+    ),
+  );
+
+  return ctx.json({ success: true });
 }
 
 async function linkReaction(ctx: Context) {
@@ -218,4 +266,6 @@ export default {
   addReaction,
   linkReaction,
   linkAction,
+  deleteAction,
+  deleteReaction,
 };

@@ -77,6 +77,24 @@ playgroundRouter.post(
   playgroundController.addReaction,
 );
 
+playgroundRouter.delete(
+  "/:playgroundId/reaction/:reactionId",
+  describeRoute({
+    tags: ["playground"],
+    description: "Delete a reaction from a playground",
+    responses: {
+      200: {
+        description: "Successful delete response",
+      },
+      400: {
+        description: "Bad request",
+      },
+    },
+  }),
+  validator("param", PlaygroundSchema.deleteReaction.Param),
+  playgroundController.deleteReaction,
+);
+
 playgroundRouter.post(
   "/:playgroundId/action/:actionId",
   describeRoute({
@@ -93,6 +111,24 @@ playgroundRouter.post(
   }),
   validator("param", PlaygroundSchema.AddAction.Param),
   playgroundController.addAction,
+);
+
+playgroundRouter.delete(
+  "/:playgroundId/action/:actionId",
+  describeRoute({
+    tags: ["playground"],
+    description: "Delete an action from a playground",
+    responses: {
+      200: {
+        description: "Successful delete response",
+      },
+      400: {
+        description: "Bad request",
+      },
+    },
+  }),
+  validator("param", PlaygroundSchema.deleteAction.Param),
+  playgroundController.deleteAction,
 );
 
 playgroundRouter.post(
