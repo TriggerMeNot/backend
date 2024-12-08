@@ -77,8 +77,18 @@ async function create(ctx: Context) {
 }
 
 async function addReaction(ctx: Context) {
-  // @ts-ignore - The `json` validator is added by the `validator` middleware
-  const { playgroundId, reactionId } = ctx.req.valid("json");
+  const { playgroundId: playgroundIdString, reactionId: reactionIdString } = ctx
+    .req.valid("param" as never);
+
+  if (isNaN(parseInt(playgroundIdString))) {
+    return ctx.json({ error: "Invalid playground ID" }, 400);
+  }
+  if (isNaN(parseInt(reactionIdString))) {
+    return ctx.json({ error: "Invalid reaction ID" }, 400);
+  }
+
+  const playgroundId = parseInt(playgroundIdString);
+  const reactionId = parseInt(reactionIdString);
 
   await db.insert(reactionsPlaygroundSchema).values({
     playgroundId,
@@ -89,8 +99,19 @@ async function addReaction(ctx: Context) {
 }
 
 async function addAction(ctx: Context) {
-  // @ts-ignore - The `json` validator is added by the `validator` middleware
-  const { playgroundId, actionId, settings } = ctx.req.valid("json");
+  const { playgroundId: playgroundIdString, actionId: actionIdString } = ctx.req
+    .valid("param" as never);
+  const { settings } = ctx.req.valid("json" as never);
+
+  if (isNaN(parseInt(playgroundIdString))) {
+    return ctx.json({ error: "Invalid playground ID" }, 400);
+  }
+  if (isNaN(parseInt(actionIdString))) {
+    return ctx.json({ error: "Invalid action ID" }, 400);
+  }
+
+  const playgroundId = parseInt(playgroundIdString);
+  const actionId = parseInt(actionIdString);
 
   await db.insert(actionsPlaygroundSchema).values({
     playgroundId,
@@ -102,8 +123,7 @@ async function addAction(ctx: Context) {
 }
 
 async function link(ctx: Context) {
-  // @ts-ignore - The `json` validator is added by the `validator` middleware
-  const { triggerType, triggerId, actionId } = ctx.req.valid("json");
+  const { triggerType, triggerId, actionId } = ctx.req.valid("json" as never);
 
   const actions = await db.select().from(actionsPlaygroundSchema).where(
     eq(actionsPlaygroundSchema.id, actionId),
