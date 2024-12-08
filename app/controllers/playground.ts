@@ -17,6 +17,37 @@ async function list(ctx: Context) {
   return ctx.json(playgrounds);
 }
 
+async function get(ctx: Context) {
+  const { id: idString } = ctx.req.valid("param" as never);
+
+  if (isNaN(parseInt(idString))) {
+    return ctx.json({ error: "Invalid playground ID" }, 400);
+  }
+
+  const id = parseInt(idString);
+  const playgrounds = await db.select().from(playgroundSchema).where(
+    eq(playgroundSchema.id, id),
+  ).limit(1);
+
+  if (!playgrounds.length) {
+    return ctx.json({ error: "Playground not found" }, 404);
+  }
+
+  const actions = await db.select().from(actionsPlaygroundSchema).where(
+    eq(actionsPlaygroundSchema.playgroundId, id),
+  );
+
+  const reactions = await db.select().from(reactionsPlaygroundSchema).where(
+    eq(reactionsPlaygroundSchema.playgroundId, id),
+  );
+
+  return ctx.json({
+    ...playgrounds[0],
+    actions,
+    reactions,
+  });
+}
+
 async function create(ctx: Context) {
   // @ts-ignore - The `json` validator is added by the `validator` middleware
   const { name } = ctx.req.valid("json");
@@ -116,4 +147,4 @@ async function link(ctx: Context) {
   return ctx.json({ success: true }, 201);
 }
 
-export default { list, create, addReaction, addAction, link };
+export default { list, create, get, addReaction, addAction, link };
