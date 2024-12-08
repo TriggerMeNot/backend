@@ -1,7 +1,6 @@
 import { Hono } from "@hono";
 import { describeRoute } from "@hono-openapi";
 import { resolver, validator } from "@hono-openapi/zod";
-import jwtMiddleware from "../middlewares/jwt.ts";
 import AuthSchema from "../interfaces/auth.ts";
 import authController from "../controllers/auth.ts";
 import GithubSchema from "../interfaces/github.ts";
@@ -56,8 +55,6 @@ authRouter.post(
   validator("form", AuthSchema.Register.Body),
   authController.register,
 );
-
-authRouter.use(jwtMiddleware);
 
 authRouter.post(
   "/github",
