@@ -27,6 +27,12 @@ export default {
       actionId: z.string(),
     }),
   },
+  deleteAction: {
+    Param: z.object({
+      playgroundId: z.string(),
+      actionId: z.string(),
+    }),
+  },
   AddReaction: {
     Param: z.object({
       playgroundId: z.string(),
@@ -34,6 +40,12 @@ export default {
     }),
     Body: z.object({
       settings: z.record(z.any()),
+    }),
+  },
+  deleteReaction: {
+    Param: z.object({
+      playgroundId: z.string(),
+      reactionId: z.string(),
     }),
   },
   LinkAction: {
