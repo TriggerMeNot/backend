@@ -36,11 +36,16 @@ export default {
       settings: z.record(z.any()),
     }),
   },
-  Link: {
-    Body: z.object({
-      triggerType: z.string(),
-      triggerId: z.number(),
-      reactionId: z.number(),
+  LinkAction: {
+    Param: z.object({
+      triggerId: z.string(),
+      reactionId: z.string(),
+    }),
+  },
+  LinkReaction: {
+    Param: z.object({
+      triggerId: z.string(),
+      actionId: z.string(),
     }),
   },
 };

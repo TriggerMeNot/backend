@@ -96,10 +96,10 @@ playgroundRouter.post(
 );
 
 playgroundRouter.post(
-  "/link",
+  "/link/action/:triggerId/reaction/:reactionId",
   describeRoute({
     tags: ["playground"],
-    description: "Link action or reaction to a reaction",
+    description: "Link an action to a reaction",
     responses: {
       200: {
         description: "Successful link response",
@@ -107,13 +107,28 @@ playgroundRouter.post(
       400: {
         description: "Bad request",
       },
-      404: {
-        description: "Not found",
+    },
+  }),
+  validator("param", PlaygroundSchema.LinkAction.Param),
+  playgroundController.linkAction,
+);
+
+playgroundRouter.post(
+  "/link/reaction/:triggerId/action/:reactionId",
+  describeRoute({
+    tags: ["playground"],
+    description: "Link a reaction to an action",
+    responses: {
+      200: {
+        description: "Successful link response",
+      },
+      400: {
+        description: "Bad request",
       },
     },
   }),
-  validator("json", PlaygroundSchema.Link.Body),
-  playgroundController.link,
+  validator("param", PlaygroundSchema.LinkReaction.Param),
+  playgroundController.linkReaction,
 );
 
 export default playgroundRouter;
