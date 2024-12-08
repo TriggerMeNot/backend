@@ -10,7 +10,7 @@ const triggerMeNotRouter = new Hono();
 triggerMeNotRouter.use(jwtMiddleware);
 
 triggerMeNotRouter.post(
-  "/on-fetch",
+  "/on-fetch/:token",
   describeRoute({
     tags: ["triggerMeNot"],
     description: "React to a fetch event",
@@ -23,7 +23,7 @@ triggerMeNotRouter.post(
       },
     },
   }),
-  validator("json", triggerMeNotSchema.OnFetch.Body),
+  validator("param", triggerMeNotSchema.OnFetch.Param),
   triggerMeNotController.OnFetch,
 );
 

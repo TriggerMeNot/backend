@@ -2,10 +2,12 @@ import { Context } from "@hono";
 import { db } from "../db/config.ts";
 import { eq } from "drizzle-orm/expressions";
 import { playgrounds as playgroundSchema } from "../schemas/playgrounds.ts";
-import { reactionsPlayground as reactionsPlaygroundSchema } from "../schemas/reactionsPlayground.ts";
-import { actionsPlayground as actionsPlaygroundSchema } from "../schemas/actionsPlayground.ts";
+import { actions as actionSchema } from "../schemas/actions.ts";
+import { reactionsPlayground as reactionPlaygroundSchema } from "../schemas/reactionsPlayground.ts";
+import { actionsPlayground as actionPlaygroundSchema } from "../schemas/actionsPlayground.ts";
 import { reactionLinks as reactionLinkSchema } from "../schemas/reactionLinks.ts";
 import { actionLinks as actionLinkSchema } from "../schemas/actionLinks.ts";
+import actionController from "../actions/actions.ts";
 
 async function list(ctx: Context) {
   const userId = ctx.get("jwtPayload").sub;
@@ -33,12 +35,12 @@ async function get(ctx: Context) {
     return ctx.json({ error: "Playground not found" }, 404);
   }
 
-  const reactions = await db.select().from(reactionsPlaygroundSchema).where(
-    eq(reactionsPlaygroundSchema.playgroundId, id),
+  const reactions = await db.select().from(reactionPlaygroundSchema).where(
+    eq(reactionPlaygroundSchema.playgroundId, id),
   );
 
-  const actions = await db.select().from(actionsPlaygroundSchema).where(
-    eq(actionsPlaygroundSchema.playgroundId, id),
+  const actions = await db.select().from(actionPlaygroundSchema).where(
+    eq(actionPlaygroundSchema.playgroundId, id),
   );
 
   return ctx.json({
@@ -90,12 +92,23 @@ async function addAction(ctx: Context) {
   const playgroundId = parseInt(playgroundIdString);
   const actionId = parseInt(actionIdString);
 
-  await db.insert(actionsPlaygroundSchema).values({
+  const actionsPlayground = await db.insert(actionPlaygroundSchema).values({
     playgroundId,
     actionId,
-  });
+  }).returning();
 
-  return ctx.json({ success: true }, 201);
+  const actions = await db.select().from(actionSchema).where(
+    eq(actionSchema.id, actionId),
+  ).limit(1);
+
+  const action = actions[0];
+
+  return await actionController.init(
+    action.name,
+    ctx,
+    actionsPlayground[0],
+    playgroundId,
+  );
 }
 
 async function addReaction(ctx: Context) {
@@ -114,7 +127,7 @@ async function addReaction(ctx: Context) {
   const playgroundId = parseInt(playgroundIdString);
   const reactionId = parseInt(reactionIdString);
 
-  await db.insert(reactionsPlaygroundSchema).values({
+  await db.insert(reactionPlaygroundSchema).values({
     playgroundId,
     reactionId,
     settings,
@@ -126,8 +139,8 @@ async function addReaction(ctx: Context) {
 async function link(ctx: Context) {
   const { triggerType, triggerId, reactionId } = ctx.req.valid("json" as never);
 
-  const reactions = await db.select().from(reactionsPlaygroundSchema).where(
-    eq(reactionsPlaygroundSchema.id, reactionId),
+  const reactions = await db.select().from(reactionPlaygroundSchema).where(
+    eq(reactionPlaygroundSchema.id, reactionId),
   ).limit(1);
 
   if (!reactions.length) {
@@ -138,8 +151,8 @@ async function link(ctx: Context) {
   const playgroundId = reaction.playgroundId;
 
   if (triggerType === "reaction") {
-    const triggers = await db.select().from(reactionsPlaygroundSchema).where(
-      eq(reactionsPlaygroundSchema.id, triggerId),
+    const triggers = await db.select().from(reactionPlaygroundSchema).where(
+      eq(reactionPlaygroundSchema.id, triggerId),
     ).limit(1);
 
     if (!triggers.length) {
@@ -158,8 +171,8 @@ async function link(ctx: Context) {
       reactionId,
     });
   } else {
-    const triggers = await db.select().from(actionsPlaygroundSchema).where(
-      eq(actionsPlaygroundSchema.id, triggerId),
+    const triggers = await db.select().from(actionPlaygroundSchema).where(
+      eq(actionPlaygroundSchema.id, triggerId),
     ).limit(1);
 
     if (!triggers.length) {
