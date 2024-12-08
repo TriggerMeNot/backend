@@ -48,10 +48,9 @@ async function register(ctx: Context) {
     }
   }
 
-  const hashedPassword = await bcrypt.hash(
-    password,
-    Deno.env.get("SALT_ROUNDS")!,
-  );
+  const saltRounds = parseInt(Deno.env.get("SALT_ROUNDS")!, 10);
+  const salt = await bcrypt.genSalt(saltRounds);
+  const hashedPassword = await bcrypt.hash(password, salt);
 
   const users = await db.insert(userSchema).values({
     email,
