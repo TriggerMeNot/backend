@@ -2,16 +2,16 @@ import { assertEquals } from "@std/assert";
 import playgroundController from "./playground.ts";
 
 Deno.test({
-  name: "Playground controller has addReaction function",
+  name: "Playground controller has addAction function",
   fn() {
-    assertEquals(typeof playgroundController.addReaction, "function");
+    assertEquals(typeof playgroundController.addAction, "function");
   },
 });
 
 Deno.test({
-  name: "Playground controller has addAction function",
+  name: "Playground controller has addReaction function",
   fn() {
-    assertEquals(typeof playgroundController.addAction, "function");
+    assertEquals(typeof playgroundController.addReaction, "function");
   },
 });
 

@@ -1,11 +1,11 @@
 import { assertEquals } from "@std/assert";
-import triggerMeNotActions from "./triggerMeNot.ts";
-import ActionTrigger from "../types/ActionTrigger.ts";
+import triggerMeNotReactions from "./triggerMeNot.ts";
+import ReactionTrigger from "../types/ReactionTrigger.ts";
 
 Deno.test({
-  name: "TriggerMeNot actions fetchRequest works",
+  name: "TriggerMeNot reactions fetchRequest works",
   async fn() {
-    const action: ActionTrigger = {
+    const reaction: ReactionTrigger = {
       id: 0,
       name: "Fetch Request",
       param: {},
@@ -16,7 +16,7 @@ Deno.test({
       },
     };
 
-    const result = await triggerMeNotActions.fetchRequest(action);
+    const result = await triggerMeNotReactions.fetchRequest(reaction);
 
     assertEquals(
       result.status,
