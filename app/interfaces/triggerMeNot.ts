@@ -3,8 +3,8 @@ import "zod-openapi/extend";
 
 export default {
   OnFetch: {
-    Body: z.object({
-      actionId: z.number(),
+    Param: z.object({
+      token: z.string(),
     }),
   },
 };
