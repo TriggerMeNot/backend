@@ -11,6 +11,7 @@ import defaultRouter from "./routes/default.ts";
 import authRouter from "./routes/auth.ts";
 import userRouter from "./routes/user.ts";
 import githubRouter from "./routes/github.ts";
+import wsRouter from "./routes/ws.ts";
 
 const app = new Hono().basePath("/api");
 
@@ -33,6 +34,7 @@ app.route("/", defaultRouter);
 app.route("/auth", authRouter);
 app.route("/user", userRouter);
 app.route("/github", githubRouter);
+app.route("/ws", wsRouter);
 
 app.get(
   "/openapi",
