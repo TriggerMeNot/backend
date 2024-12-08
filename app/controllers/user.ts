@@ -15,7 +15,7 @@ async function self(ctx: Context) {
     eq(userSchema.id, userId),
   ).limit(1);
 
-  return ctx.json(user);
+  return ctx.json(user[0]);
 }
 
 async function getUser(ctx: Context) {
