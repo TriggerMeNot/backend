@@ -1,5 +1,8 @@
+name: trigger-me-not-backend-dev
+
 services:
   db:
+    container_name: trigger-me-not-db-dev
     image: postgres:17
     environment:
       POSTGRES_USER: postgres
@@ -7,3 +10,8 @@ services:
       POSTGRES_DB: postgres
     ports:
       - "5432:5432"
+    volumes:
+      - db_data_dev:/var/lib/postgresql/data
+
+volumes:
+  db_data_dev:

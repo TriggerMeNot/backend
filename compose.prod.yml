@@ -1,5 +1,18 @@
+name: trigger-me-not-backend
+
 services:
+  db:
+    container_name: trigger-me-not-db
+    image: postgres:17
+    env_file:
+      - .env
+    networks:
+      - app-network
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
   backend:
+    container_name: trigger-me-not-api
     build:
       dockerfile: Dockerfile
     depends_on:
@@ -10,12 +23,9 @@ services:
       - DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@db:5432/$POSTGRES_DB
     networks:
       - app-network
-  db:
-    image: postgres:17
-    env_file:
-      - .env
-    networks:
-      - app-network
+
+volumes:
+  db_data:
 
 networks:
   app-network:

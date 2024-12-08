@@ -2,6 +2,19 @@ import z from "zod";
 import "zod-openapi/extend";
 
 export default {
+  List: {
+    Response: z.object({
+      id: z.number(),
+      name: z.string(),
+      reactions: z.array(z.number()),
+      actions: z.array(z.number()),
+    }),
+  },
+  Create: {
+    Body: z.object({
+      name: z.string().min(2),
+    }),
+  },
   AddReaction: {
     Body: z.object({
       playgroundId: z.number(),
