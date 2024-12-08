@@ -10,6 +10,8 @@ services:
       - app-network
     volumes:
       - db_data:/var/lib/postgresql/data
+    restart:
+      unless-stopped
 
   backend:
     container_name: trigger-me-not-api
@@ -23,6 +25,8 @@ services:
       - DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@db:5432/$POSTGRES_DB
     networks:
       - app-network
+    restart:
+      unless-stopped
 
 volumes:
   db_data:

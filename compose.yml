@@ -12,6 +12,8 @@ services:
       - "5432:5432"
     volumes:
       - db_data_dev:/var/lib/postgresql/data
+    restart:
+      unless-stopped
 
 volumes:
   db_data_dev:
