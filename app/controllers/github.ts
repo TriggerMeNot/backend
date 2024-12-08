@@ -64,7 +64,7 @@ async function root(ctx: Context) {
   }
 
   // deno-lint-ignore no-explicit-any
-  const email = userData.find((email: any) => email.primary);
+  const email = userData.find((email: any) => email.primary)?.email;
 
   if (!email) {
     return ctx.json({ error: "No suitable email found in GitHub account" }, 400);
