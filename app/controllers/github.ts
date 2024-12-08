@@ -1,12 +1,15 @@
 import { Context } from "@hono";
 import { db } from "../db/config.ts";
-import { eq, and } from "drizzle-orm/expressions";
+import { and, eq } from "drizzle-orm/expressions";
 import { oauths as oauthSchema } from "../schemas/oauths.ts";
 import { services as serviceSchema } from "../schemas/services.ts";
 import { users as userSchema } from "../schemas/users.ts";
 import { sign } from "@hono/jwt";
 
-if (!Deno.env.get("GITHUB_ID") || !Deno.env.get("GITHUB_SECRET") || !Deno.env.get("JWT_SECRET")) {
+if (
+  !Deno.env.get("GITHUB_ID") || !Deno.env.get("GITHUB_SECRET") ||
+  !Deno.env.get("JWT_SECRET")
+) {
   throw new Error("Environment variables for GitHub OAuth or JWT not set");
 }
 
@@ -67,7 +70,10 @@ async function root(ctx: Context) {
   const email = userData.find((email: any) => email.primary)?.email;
 
   if (!email) {
-    return ctx.json({ error: "No suitable email found in GitHub account" }, 400);
+    return ctx.json(
+      { error: "No suitable email found in GitHub account" },
+      400,
+    );
   }
 
   const githubUsernameResponse = await fetch(`https://api.github.com/user`, {
