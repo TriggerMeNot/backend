@@ -136,63 +136,86 @@ async function addReaction(ctx: Context) {
   return ctx.json({ success: true }, 201);
 }
 
-async function link(ctx: Context) {
-  const { triggerType, triggerId, reactionId } = ctx.req.valid("json" as never);
+async function linkReaction(ctx: Context) {
+  const { triggerId, reactionId } = ctx.req.valid("param" as never);
 
-  const reactions = await db.select().from(reactionPlaygroundSchema).where(
-    eq(reactionPlaygroundSchema.id, reactionId),
-  ).limit(1);
+  const reactions = await db.select().from(reactionPlaygroundSchema)
+    .where(eq(reactionPlaygroundSchema.id, triggerId))
+    .limit(1);
 
   if (!reactions.length) {
+    return ctx.json({ error: "Trigger not found" }, 404);
+  }
+
+  const trigger = reactions[0];
+
+  const targetReactions = await db.select().from(reactionPlaygroundSchema)
+    .where(eq(reactionPlaygroundSchema.id, reactionId))
+    .limit(1);
+
+  if (!targetReactions.length) {
     return ctx.json({ error: "Reaction not found" }, 404);
   }
 
-  const reaction = reactions[0];
-  const playgroundId = reaction.playgroundId;
+  const targetReaction = targetReactions[0];
 
-  if (triggerType === "reaction") {
-    const triggers = await db.select().from(reactionPlaygroundSchema).where(
-      eq(reactionPlaygroundSchema.id, triggerId),
-    ).limit(1);
-
-    if (!triggers.length) {
-      return ctx.json({ error: "Trigger not found" }, 404);
-    }
-
-    const trigger = triggers[0];
-    if (trigger.playgroundId !== playgroundId) {
-      return ctx.json({
-        error: "Trigger and reaction are not in the same playground",
-      }, 400);
-    }
-
-    await db.insert(reactionLinkSchema).values({
-      triggerId,
-      reactionId,
-    });
-  } else {
-    const triggers = await db.select().from(actionPlaygroundSchema).where(
-      eq(actionPlaygroundSchema.id, triggerId),
-    ).limit(1);
-
-    if (!triggers.length) {
-      return ctx.json({ error: "Trigger not found" }, 404);
-    }
-
-    const trigger = triggers[0];
-    if (trigger.playgroundId !== playgroundId) {
-      return ctx.json({
-        error: "Trigger and reaction are not in the same playground",
-      }, 400);
-    }
-
-    await db.insert(actionLinkSchema).values({
-      triggerId,
-      reactionId,
-    });
+  if (trigger.playgroundId !== targetReaction.playgroundId) {
+    return ctx.json({
+      error: "Trigger and reaction are not in the same playground",
+    }, 400);
   }
+
+  await db.insert(reactionLinkSchema).values({
+    triggerId,
+    reactionId,
+  });
 
   return ctx.json({ success: true }, 201);
 }
 
-export default { list, create, get, addAction, addReaction, link };
+async function linkAction(ctx: Context) {
+  const { triggerId, reactionId } = ctx.req.valid("param" as never);
+
+  const actions = await db.select().from(actionPlaygroundSchema)
+    .where(eq(actionPlaygroundSchema.id, triggerId))
+    .limit(1);
+
+  if (!actions.length) {
+    return ctx.json({ error: "Trigger not found" }, 404);
+  }
+
+  const trigger = actions[0];
+
+  const targetReactions = await db.select().from(reactionPlaygroundSchema)
+    .where(eq(reactionPlaygroundSchema.id, reactionId))
+    .limit(1);
+
+  if (!targetReactions.length) {
+    return ctx.json({ error: "Reaction not found" }, 404);
+  }
+
+  const targetReaction = targetReactions[0];
+
+  if (trigger.playgroundId !== targetReaction.playgroundId) {
+    return ctx.json({
+      error: "Trigger and reaction are not in the same playground",
+    }, 400);
+  }
+
+  await db.insert(actionLinkSchema).values({
+    triggerId,
+    reactionId,
+  });
+
+  return ctx.json({ success: true }, 201);
+}
+
+export default {
+  list,
+  create,
+  get,
+  addAction,
+  addReaction,
+  linkReaction,
+  linkAction,
+};
