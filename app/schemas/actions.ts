@@ -1,4 +1,4 @@
-import { integer, pgTable, serial, text } from "drizzle-orm/pg-core";
+import { integer, pgTable, serial, text, unique } from "drizzle-orm/pg-core";
 import { services } from "./services.ts";
 
 export const actions = pgTable("actions", {
@@ -6,4 +6,8 @@ export const actions = pgTable("actions", {
   serviceId: integer("service_id").notNull().references(() => services.id),
   name: text("name").notNull(),
   description: text("description").notNull(),
+}, (table) => {
+  return {
+    unq: unique().on(table.serviceId, table.name),
+  };
 });
