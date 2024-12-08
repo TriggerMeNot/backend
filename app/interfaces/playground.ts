@@ -22,15 +22,17 @@ export default {
     }),
   },
   AddReaction: {
-    Body: z.object({
-      playgroundId: z.number(),
-      reactionId: z.number(),
+    Param: z.object({
+      playgroundId: z.string(),
+      reactionId: z.string(),
     }),
   },
   AddAction: {
+    Param: z.object({
+      playgroundId: z.string(),
+      actionId: z.string(),
+    }),
     Body: z.object({
-      playgroundId: z.number(),
-      actionId: z.number(),
       settings: z.record(z.any()),
     }),
   },

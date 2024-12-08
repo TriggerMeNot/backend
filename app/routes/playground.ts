@@ -59,7 +59,7 @@ playgroundRouter.get(
 );
 
 playgroundRouter.post(
-  "/action",
+  "/:playgroundId/action/:actionId",
   describeRoute({
     tags: ["playground"],
     description: "Add an action to a playground",
@@ -72,12 +72,13 @@ playgroundRouter.post(
       },
     },
   }),
+  validator("param", PlaygroundSchema.AddAction.Param),
   validator("json", PlaygroundSchema.AddAction.Body),
   playgroundController.addAction,
 );
 
 playgroundRouter.post(
-  "/reaction",
+  "/:playgroundId/reaction/:reactionId",
   describeRoute({
     tags: ["playground"],
     description: "Add a reaction to a playground",
@@ -90,7 +91,7 @@ playgroundRouter.post(
       },
     },
   }),
-  validator("json", PlaygroundSchema.AddReaction.Body),
+  validator("param", PlaygroundSchema.AddReaction.Param),
   playgroundController.addReaction,
 );
 
