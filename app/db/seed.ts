@@ -1,35 +1,35 @@
 import { db } from "./config.ts";
 import { services as serviceSchema } from "../schemas/services.ts";
-import { actions as actionSchema } from "../schemas/actions.ts";
 import { reactions as reactionSchema } from "../schemas/reactions.ts";
+import { actions as actionSchema } from "../schemas/actions.ts";
 import { and, eq } from "drizzle-orm/expressions";
 
 interface Service {
   id?: number;
-  actions?: Record<string, { id?: number; description: string }>;
   reactions?: Record<string, { id?: number; description: string }>;
+  actions?: Record<string, { id?: number; description: string }>;
 }
 
 const SERVICES: Record<string, Service> = {
   "TriggerMeNot": {
-    actions: {
+    reactions: {
       "Fetch Request": {
         description: "Fetch a URL",
       },
     },
-    reactions: {
+    actions: {
       "On Fetch": {
         description: "When it fetches",
       },
     },
   },
   "GitHub": {
-    actions: {
+    reactions: {
       "Create Issue": {
         description: "Create an issue in a repository",
       },
     },
-    reactions: {},
+    actions: {},
   },
 };
 
@@ -51,34 +51,6 @@ async function seedDatabase() {
     }
 
     service.id = serviceRecord[0].id;
-
-    // Insert actions
-    if (service.actions) {
-      for (const [actionName, action] of Object.entries(service.actions)) {
-        const actionRecord = await db.insert(actionSchema).values({
-          serviceId: service.id,
-          name: actionName,
-          description: action.description,
-        }).onConflictDoNothing().returning();
-
-        if (!actionRecord.length) {
-          const existingAction = await db.select().from(actionSchema).where(
-            and(
-              eq(actionSchema.name, actionName),
-              eq(actionSchema.serviceId, service.id),
-            ),
-          ).limit(1);
-          if (!existingAction.length) {
-            throw new Error(
-              `Failed to insert or find action: ${actionName}`,
-            );
-          }
-          actionRecord.push(existingAction[0]);
-        }
-
-        action.id = actionRecord[0].id;
-      }
-    }
 
     // Insert reactions
     if (service.reactions) {
@@ -107,6 +79,39 @@ async function seedDatabase() {
         }
 
         reaction.id = reactionRecord[0].id;
+      }
+    }
+
+    // Insert actions
+    if (service.actions) {
+      for (
+        const [actionName, action] of Object.entries(
+          service.actions,
+        )
+      ) {
+        const actionRecord = await db.insert(actionSchema).values({
+          serviceId: service.id,
+          name: actionName,
+          description: action.description,
+        }).onConflictDoNothing().returning();
+
+        if (!actionRecord.length) {
+          const existingAction = await db.select().from(actionSchema)
+            .where(
+              and(
+                eq(actionSchema.name, actionName),
+                eq(actionSchema.serviceId, service.id),
+              ),
+            ).limit(1);
+          if (!existingAction.length) {
+            throw new Error(
+              `Failed to insert or find action: ${actionName}`,
+            );
+          }
+          actionRecord.push(existingAction[0]);
+        }
+
+        action.id = actionRecord[0].id;
       }
     }
   }

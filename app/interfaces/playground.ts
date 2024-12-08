@@ -6,8 +6,8 @@ export default {
     Response: z.object({
       id: z.number(),
       name: z.string(),
-      reactions: z.array(z.number()),
       actions: z.array(z.number()),
+      reactions: z.array(z.number()),
     }),
   },
   Get: {
@@ -17,20 +17,20 @@ export default {
     Response: z.object({
       id: z.number(),
       name: z.string(),
-      reactions: z.array(z.number()),
       actions: z.array(z.number()),
-    }),
-  },
-  AddReaction: {
-    Param: z.object({
-      playgroundId: z.string(),
-      reactionId: z.string(),
+      reactions: z.array(z.number()),
     }),
   },
   AddAction: {
     Param: z.object({
       playgroundId: z.string(),
       actionId: z.string(),
+    }),
+  },
+  AddReaction: {
+    Param: z.object({
+      playgroundId: z.string(),
+      reactionId: z.string(),
     }),
     Body: z.object({
       settings: z.record(z.any()),
@@ -40,7 +40,7 @@ export default {
     Body: z.object({
       triggerType: z.string(),
       triggerId: z.number(),
-      actionId: z.number(),
+      reactionId: z.number(),
     }),
   },
 };

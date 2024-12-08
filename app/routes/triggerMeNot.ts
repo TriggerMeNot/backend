@@ -16,7 +16,7 @@ triggerMeNotRouter.post(
     description: "React to a fetch event",
     responses: {
       200: {
-        description: "Successful reaction response",
+        description: "Successful action response",
       },
       400: {
         description: "Bad request",

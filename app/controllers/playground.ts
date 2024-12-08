@@ -2,10 +2,10 @@ import { Context } from "@hono";
 import { db } from "../db/config.ts";
 import { eq } from "drizzle-orm/expressions";
 import { playgrounds as playgroundSchema } from "../schemas/playgrounds.ts";
-import { actionsPlayground as actionsPlaygroundSchema } from "../schemas/actionsPlayground.ts";
 import { reactionsPlayground as reactionsPlaygroundSchema } from "../schemas/reactionsPlayground.ts";
-import { actionLinks as actionLinkSchema } from "../schemas/actionLinks.ts";
+import { actionsPlayground as actionsPlaygroundSchema } from "../schemas/actionsPlayground.ts";
 import { reactionLinks as reactionLinkSchema } from "../schemas/reactionLinks.ts";
+import { actionLinks as actionLinkSchema } from "../schemas/actionLinks.ts";
 
 async function list(ctx: Context) {
   const userId = ctx.get("jwtPayload").sub;
@@ -33,18 +33,18 @@ async function get(ctx: Context) {
     return ctx.json({ error: "Playground not found" }, 404);
   }
 
-  const actions = await db.select().from(actionsPlaygroundSchema).where(
-    eq(actionsPlaygroundSchema.playgroundId, id),
-  );
-
   const reactions = await db.select().from(reactionsPlaygroundSchema).where(
     eq(reactionsPlaygroundSchema.playgroundId, id),
   );
 
+  const actions = await db.select().from(actionsPlaygroundSchema).where(
+    eq(actionsPlaygroundSchema.playgroundId, id),
+  );
+
   return ctx.json({
     ...playgrounds[0],
-    actions,
     reactions,
+    actions,
   });
 }
 
@@ -76,32 +76,9 @@ async function create(ctx: Context) {
   return ctx.json(playground[0], 201);
 }
 
-async function addReaction(ctx: Context) {
-  const { playgroundId: playgroundIdString, reactionId: reactionIdString } = ctx
-    .req.valid("param" as never);
-
-  if (isNaN(parseInt(playgroundIdString))) {
-    return ctx.json({ error: "Invalid playground ID" }, 400);
-  }
-  if (isNaN(parseInt(reactionIdString))) {
-    return ctx.json({ error: "Invalid reaction ID" }, 400);
-  }
-
-  const playgroundId = parseInt(playgroundIdString);
-  const reactionId = parseInt(reactionIdString);
-
-  await db.insert(reactionsPlaygroundSchema).values({
-    playgroundId,
-    reactionId,
-  });
-
-  return ctx.json({ success: true }, 201);
-}
-
 async function addAction(ctx: Context) {
-  const { playgroundId: playgroundIdString, actionId: actionIdString } = ctx.req
-    .valid("param" as never);
-  const { settings } = ctx.req.valid("json" as never);
+  const { playgroundId: playgroundIdString, actionId: actionIdString } = ctx
+    .req.valid("param" as never);
 
   if (isNaN(parseInt(playgroundIdString))) {
     return ctx.json({ error: "Invalid playground ID" }, 400);
@@ -116,6 +93,30 @@ async function addAction(ctx: Context) {
   await db.insert(actionsPlaygroundSchema).values({
     playgroundId,
     actionId,
+  });
+
+  return ctx.json({ success: true }, 201);
+}
+
+async function addReaction(ctx: Context) {
+  const { playgroundId: playgroundIdString, reactionId: reactionIdString } = ctx
+    .req
+    .valid("param" as never);
+  const { settings } = ctx.req.valid("json" as never);
+
+  if (isNaN(parseInt(playgroundIdString))) {
+    return ctx.json({ error: "Invalid playground ID" }, 400);
+  }
+  if (isNaN(parseInt(reactionIdString))) {
+    return ctx.json({ error: "Invalid reaction ID" }, 400);
+  }
+
+  const playgroundId = parseInt(playgroundIdString);
+  const reactionId = parseInt(reactionIdString);
+
+  await db.insert(reactionsPlaygroundSchema).values({
+    playgroundId,
+    reactionId,
     settings,
   });
 
@@ -123,40 +124,20 @@ async function addAction(ctx: Context) {
 }
 
 async function link(ctx: Context) {
-  const { triggerType, triggerId, actionId } = ctx.req.valid("json" as never);
+  const { triggerType, triggerId, reactionId } = ctx.req.valid("json" as never);
 
-  const actions = await db.select().from(actionsPlaygroundSchema).where(
-    eq(actionsPlaygroundSchema.id, actionId),
+  const reactions = await db.select().from(reactionsPlaygroundSchema).where(
+    eq(reactionsPlaygroundSchema.id, reactionId),
   ).limit(1);
 
-  if (!actions.length) {
-    return ctx.json({ error: "Action not found" }, 404);
+  if (!reactions.length) {
+    return ctx.json({ error: "Reaction not found" }, 404);
   }
 
-  const action = actions[0];
-  const playgroundId = action.playgroundId;
+  const reaction = reactions[0];
+  const playgroundId = reaction.playgroundId;
 
-  if (triggerType === "action") {
-    const triggers = await db.select().from(actionsPlaygroundSchema).where(
-      eq(actionsPlaygroundSchema.id, triggerId),
-    ).limit(1);
-
-    if (!triggers.length) {
-      return ctx.json({ error: "Trigger not found" }, 404);
-    }
-
-    const trigger = triggers[0];
-    if (trigger.playgroundId !== playgroundId) {
-      return ctx.json({
-        error: "Trigger and action are not in the same playground",
-      }, 400);
-    }
-
-    await db.insert(actionLinkSchema).values({
-      triggerId,
-      actionId,
-    });
-  } else {
+  if (triggerType === "reaction") {
     const triggers = await db.select().from(reactionsPlaygroundSchema).where(
       eq(reactionsPlaygroundSchema.id, triggerId),
     ).limit(1);
@@ -168,17 +149,37 @@ async function link(ctx: Context) {
     const trigger = triggers[0];
     if (trigger.playgroundId !== playgroundId) {
       return ctx.json({
-        error: "Trigger and action are not in the same playground",
+        error: "Trigger and reaction are not in the same playground",
       }, 400);
     }
 
     await db.insert(reactionLinkSchema).values({
       triggerId,
-      actionId,
+      reactionId,
+    });
+  } else {
+    const triggers = await db.select().from(actionsPlaygroundSchema).where(
+      eq(actionsPlaygroundSchema.id, triggerId),
+    ).limit(1);
+
+    if (!triggers.length) {
+      return ctx.json({ error: "Trigger not found" }, 404);
+    }
+
+    const trigger = triggers[0];
+    if (trigger.playgroundId !== playgroundId) {
+      return ctx.json({
+        error: "Trigger and reaction are not in the same playground",
+      }, 400);
+    }
+
+    await db.insert(actionLinkSchema).values({
+      triggerId,
+      reactionId,
     });
   }
 
   return ctx.json({ success: true }, 201);
 }
 
-export default { list, create, get, addReaction, addAction, link };
+export default { list, create, get, addAction, addReaction, link };

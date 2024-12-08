@@ -59,29 +59,10 @@ playgroundRouter.get(
 );
 
 playgroundRouter.post(
-  "/:playgroundId/action/:actionId",
-  describeRoute({
-    tags: ["playground"],
-    description: "Add an action to a playground",
-    responses: {
-      200: {
-        description: "Successful action response",
-      },
-      400: {
-        description: "Bad request",
-      },
-    },
-  }),
-  validator("param", PlaygroundSchema.AddAction.Param),
-  validator("json", PlaygroundSchema.AddAction.Body),
-  playgroundController.addAction,
-);
-
-playgroundRouter.post(
   "/:playgroundId/reaction/:reactionId",
   describeRoute({
     tags: ["playground"],
-    description: "Add a reaction to a playground",
+    description: "Add an reaction to a playground",
     responses: {
       200: {
         description: "Successful reaction response",
@@ -92,14 +73,33 @@ playgroundRouter.post(
     },
   }),
   validator("param", PlaygroundSchema.AddReaction.Param),
+  validator("json", PlaygroundSchema.AddReaction.Body),
   playgroundController.addReaction,
+);
+
+playgroundRouter.post(
+  "/:playgroundId/action/:actionId",
+  describeRoute({
+    tags: ["playground"],
+    description: "Add a action to a playground",
+    responses: {
+      200: {
+        description: "Successful action response",
+      },
+      400: {
+        description: "Bad request",
+      },
+    },
+  }),
+  validator("param", PlaygroundSchema.AddAction.Param),
+  playgroundController.addAction,
 );
 
 playgroundRouter.post(
   "/link",
   describeRoute({
     tags: ["playground"],
-    description: "Link reaction or action to a action",
+    description: "Link action or reaction to a reaction",
     responses: {
       200: {
         description: "Successful link response",

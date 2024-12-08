@@ -1,72 +1,76 @@
 // import { Context } from "@hono";
 import { db } from "../db/config.ts";
 import { eq } from "drizzle-orm/expressions";
-import { actions as actionsSchema } from "../schemas/actions.ts";
-import { actionsPlayground as actionsPlaygroundSchema } from "../schemas/actionsPlayground.ts";
-import { actionLinks as actionLinkSchema } from "../schemas/actionLinks.ts";
+import { reactions as reactionsSchema } from "../schemas/reactions.ts";
+import { reactionsPlayground as reactionsPlaygroundSchema } from "../schemas/reactionsPlayground.ts";
 import { reactionLinks as reactionLinkSchema } from "../schemas/reactionLinks.ts";
-import Action from "../actions/action.ts";
+import { actionLinks as actionLinkSchema } from "../schemas/actionLinks.ts";
+import Reaction from "../reactions/reaction.ts";
 import { type InferSelectModel } from "drizzle-orm";
 
 async function trigger(
-  actionPlayground: InferSelectModel<typeof actionsPlaygroundSchema>,
+  reactionPlayground: InferSelectModel<typeof reactionsPlaygroundSchema>,
   param: unknown,
 ) {
-  const actions = await db.select().from(actionsSchema)
+  const reactions = await db.select().from(reactionsSchema)
     .where(
-      eq(actionsSchema.id, actionPlayground.actionId),
+      eq(reactionsSchema.id, reactionPlayground.reactionId),
     ).limit(1);
 
-  if (!actions.length) {
+  if (!reactions.length) {
     return;
   }
-  const action = actions[0];
+  const reaction = reactions[0];
 
-  Action.run({
-    id: actionPlayground.id,
-    name: action.name,
-    settings: actionPlayground.settings,
+  Reaction.run({
+    id: reactionPlayground.id,
+    name: reaction.name,
+    settings: reactionPlayground.settings,
     param: param,
   });
 }
 
-async function reactionTrigger(triggerId: number, param: unknown) {
-  const triggeredActions = await db.select().from(reactionLinkSchema).where(
-    eq(reactionLinkSchema.triggerId, triggerId),
-  );
-
-  for (const triggeredAction of triggeredActions) {
-    const actionPlaygrounds = await db.select().from(actionsPlaygroundSchema)
-      .where(
-        eq(actionsPlaygroundSchema.id, triggeredAction.actionId),
-      ).limit(1);
-
-    if (!actionPlaygrounds.length) {
-      continue;
-    }
-    const actionPlayground = actionPlaygrounds[0];
-
-    trigger(actionPlayground, param);
-  }
-}
-
 async function actionTrigger(triggerId: number, param: unknown) {
-  const triggeredActions = await db.select().from(actionLinkSchema).where(
+  const triggeredReactions = await db.select().from(actionLinkSchema).where(
     eq(actionLinkSchema.triggerId, triggerId),
   );
 
-  for (const triggeredAction of triggeredActions) {
-    const actionPlaygrounds = await db.select().from(actionsPlaygroundSchema)
+  for (const triggeredReaction of triggeredReactions) {
+    const reactionPlaygrounds = await db.select().from(
+      reactionsPlaygroundSchema,
+    )
       .where(
-        eq(actionsPlaygroundSchema.id, triggeredAction.actionId),
+        eq(reactionsPlaygroundSchema.id, triggeredReaction.reactionId),
       ).limit(1);
 
-    if (!actionPlaygrounds.length) {
+    if (!reactionPlaygrounds.length) {
       continue;
     }
-    const actionPlayground = actionPlaygrounds[0];
+    const reactionPlayground = reactionPlaygrounds[0];
 
-    trigger(actionPlayground, param);
+    trigger(reactionPlayground, param);
+  }
+}
+
+async function reactionTrigger(triggerId: number, param: unknown) {
+  const triggeredReactions = await db.select().from(reactionLinkSchema).where(
+    eq(reactionLinkSchema.triggerId, triggerId),
+  );
+
+  for (const triggeredReaction of triggeredReactions) {
+    const reactionPlaygrounds = await db.select().from(
+      reactionsPlaygroundSchema,
+    )
+      .where(
+        eq(reactionsPlaygroundSchema.id, triggeredReaction.reactionId),
+      ).limit(1);
+
+    if (!reactionPlaygrounds.length) {
+      continue;
+    }
+    const reactionPlayground = reactionPlaygrounds[0];
+
+    trigger(reactionPlayground, param);
   }
 }
 

@@ -4,7 +4,7 @@ import "zod-openapi/extend";
 export default {
   OnFetch: {
     Body: z.object({
-      reactionId: z.number(),
+      actionId: z.number(),
     }),
   },
 };

@@ -162,20 +162,20 @@ OAuths {
 OAuths |o--|| Users : owner
 OAuths |o--|| Services : provider
 
-Actions {
+Reactions {
     int id
     int serviceId
     string name
 }
-Actions |o--|| Services : use
+Reactions |o--|| Services : use
 
-Reactions {
+Actions {
     int id
     int serviceId
     string name
     string description
 }
-Reactions |o--|| Services : use
+Actions |o--|| Services : use
 
 Playgrounds {
     int id
@@ -185,15 +185,6 @@ Playgrounds {
 }
 Playgrounds |o--|| Users : owner
 
-PlaygroundsActions {
-    int id
-    int playgroundId
-    int actionId
-    string settings
-}
-PlaygroundsActions |o--|| Playgrounds : actions
-PlaygroundsActions |o--|| Actions : use
-
 PlaygroundsReactions {
     int id
     int playgroundId
@@ -202,4 +193,13 @@ PlaygroundsReactions {
 }
 PlaygroundsReactions |o--|| Playgrounds : reactions
 PlaygroundsReactions |o--|| Reactions : use
+
+PlaygroundsActions {
+    int id
+    int playgroundId
+    int actionId
+    string settings
+}
+PlaygroundsActions |o--|| Playgrounds : actions
+PlaygroundsActions |o--|| Actions : use
 ```

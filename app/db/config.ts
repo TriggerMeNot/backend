@@ -3,12 +3,12 @@ import pg from "pg";
 import { users as userSchema } from "../schemas/users.ts";
 import { oauths as oauthSchema } from "../schemas/oauths.ts";
 import { services as serviceSchema } from "../schemas/services.ts";
-import { actions as actionSchema } from "../schemas/actions.ts";
 import { reactions as reactionSchema } from "../schemas/reactions.ts";
-import { actionsPlayground as actionPlaygroundSchema } from "../schemas/actionsPlayground.ts";
+import { actions as actionSchema } from "../schemas/actions.ts";
 import { reactionsPlayground as reactionPlaygroundSchema } from "../schemas/reactionsPlayground.ts";
-import { actionLinks as actionLinkSchema } from "../schemas/actionLinks.ts";
+import { actionsPlayground as actionPlaygroundSchema } from "../schemas/actionsPlayground.ts";
 import { reactionLinks as reactionLinkSchema } from "../schemas/reactionLinks.ts";
+import { actionLinks as actionLinkSchema } from "../schemas/actionLinks.ts";
 import { playgrounds as playgroundSchema } from "../schemas/playgrounds.ts";
 
 if (!Deno.env.get("DATABASE_URL")) {
@@ -26,12 +26,12 @@ export const db = drizzle({
     userSchema,
     oauthSchema,
     serviceSchema,
-    actionSchema,
     reactionSchema,
-    actionPlaygroundSchema,
+    actionSchema,
     reactionPlaygroundSchema,
-    actionLinkSchema,
+    actionPlaygroundSchema,
     reactionLinkSchema,
+    actionLinkSchema,
     playgroundSchema,
   },
 });

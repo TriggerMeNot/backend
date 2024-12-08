@@ -1,4 +1,4 @@
-import ActionTrigger from "../types/ActionTrigger.ts";
+import ReactionTrigger from "../types/ReactionTrigger.ts";
 
 interface FetchSettings {
   url: string;
@@ -7,8 +7,8 @@ interface FetchSettings {
   body: string;
 }
 
-async function fetchRequest(action: ActionTrigger) {
-  const settings = action.settings as FetchSettings;
+async function fetchRequest(reaction: ReactionTrigger) {
+  const settings = reaction.settings as FetchSettings;
 
   const fetchOptions: RequestInit = {
     method: settings.method,
