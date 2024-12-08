@@ -49,15 +49,29 @@ async function get(ctx: Context) {
 }
 
 async function create(ctx: Context) {
-  // @ts-ignore - The `json` validator is added by the `validator` middleware
-  const { name } = ctx.req.valid("json");
-
   const userId = ctx.get("jwtPayload").sub;
 
-  const playground = await db.insert(playgroundSchema).values({
-    userId,
-    name,
-  }).returning();
+  const existingPlaygrounds = await db
+    .select({ name: playgroundSchema.name })
+    .from(playgroundSchema)
+    .where(eq(playgroundSchema.userId, userId));
+
+  const baseName = "New Playground";
+  let name = baseName;
+  let counter = 1;
+
+  const existingNames = existingPlaygrounds.map((p) => p.name);
+  while (existingNames.includes(name)) {
+    name = `${baseName} (${counter++})`;
+  }
+
+  const playground = await db
+    .insert(playgroundSchema)
+    .values({
+      userId,
+      name,
+    })
+    .returning();
 
   return ctx.json(playground[0], 201);
 }
