@@ -17,33 +17,37 @@ import { seedDatabase } from "./db/seed.ts";
 
 await seedDatabase();
 
-const app = new Hono().basePath("/api");
+const app = new Hono();
+const apiRouter = new Hono();
 
 app.use(logger());
 app.use(prettyJSON());
 app.use(cors());
 
+app.route("/", defaultRouter);
+
 {
   const { printMetrics, registerMetrics } = prometheus();
 
-  app.use(registerMetrics);
-  app.get("/metrics", printMetrics);
+  apiRouter.use(registerMetrics);
+  apiRouter.get("/metrics", printMetrics);
 }
 
-app.get("/static/*", serveStatic({ precompressed: true }));
-app.use("/static/*", serveStatic({ root: "./static" }));
-app.use("/favicon.ico", serveStatic({ path: "./static/favicon.ico" }));
+apiRouter.get("/static/*", serveStatic({ precompressed: true }));
+apiRouter.use("/static/*", serveStatic({ root: "./static" }));
+apiRouter.use("/favicon.ico", serveStatic({ path: "./static/favicon.ico" }));
 
-app.route("/", defaultRouter);
-app.route("/auth", authRouter);
-app.route("/user", userRouter);
-app.route("/playground", playgroundRouter);
-app.route("/trigger-me-not", triggerMeNotRouter);
-app.route("/github", githubRouter);
+apiRouter.route("/auth", authRouter);
+apiRouter.route("/user", userRouter);
+apiRouter.route("/playground", playgroundRouter);
+apiRouter.route("/trigger-me-not", triggerMeNotRouter);
+apiRouter.route("/github", githubRouter);
+
+app.route("/api", apiRouter);
 
 app.get(
-  "/openapi",
-  openAPISpecs(app as unknown as Hono, {
+  "/api/openapi",
+  openAPISpecs(app as never, {
     documentation: {
       info: {
         title: "TriggerMeNot API",
@@ -75,13 +79,13 @@ app.get(
 );
 
 app.get(
-  "/doc",
+  "/api/doc",
   swaggerUI({
     url: "/api/openapi",
   }),
 );
 app.get(
-  "/reference",
+  "/api/reference",
   apiReference({
     theme: "saturn",
     spec: {
