@@ -37,7 +37,6 @@ playgroundRouter.post(
       },
     },
   }),
-  validator("json", PlaygroundSchema.Create.Body),
   playgroundController.create,
 );
 

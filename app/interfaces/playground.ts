@@ -21,11 +21,6 @@ export default {
       actions: z.array(z.number()),
     }),
   },
-  Create: {
-    Body: z.object({
-      name: z.string().min(2),
-    }),
-  },
   AddReaction: {
     Body: z.object({
       playgroundId: z.number(),
