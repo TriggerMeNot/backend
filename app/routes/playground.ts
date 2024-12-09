@@ -224,10 +224,10 @@ playgroundRouter.delete(
 );
 
 playgroundRouter.post(
-  "/link/reaction/:triggerId/action/:reactionPlaygroundId",
+  "/link/reaction/:triggerId/reaction/:reactionPlaygroundId",
   describeRoute({
     tags: ["playground"],
-    description: "Link a reaction to an action",
+    description: "Link a reaction to an reaction",
     responses: {
       200: {
         description: "Successful link response",
