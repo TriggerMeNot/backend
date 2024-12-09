@@ -226,6 +226,39 @@ async function addReaction(ctx: Context) {
   return ctx.json(reactions[0], 201);
 }
 
+async function patchReactionSettings(ctx: Context) {
+  const {
+    playgroundId: playgroundIdString,
+    reactionPlaygroundId: reactionPlaygroundIdString,
+  } = ctx.req.valid("param" as never);
+  const { settings } = ctx.req.valid("json" as never);
+
+  if (isNaN(parseInt(playgroundIdString))) {
+    return ctx.json({ error: "Invalid playground ID" }, 400);
+  }
+  if (isNaN(parseInt(reactionPlaygroundIdString))) {
+    return ctx.json({ error: "Invalid reaction ID" }, 400);
+  }
+
+  const playgroundId = parseInt(playgroundIdString);
+  const reactionId = parseInt(reactionPlaygroundIdString);
+
+  const reactions = await db.update(reactionPlaygroundSchema).set({
+    settings,
+  }).where(
+    and(
+      eq(reactionPlaygroundSchema.id, reactionId),
+      eq(reactionPlaygroundSchema.playgroundId, playgroundId),
+    ),
+  ).returning();
+
+  if (!reactions.length) {
+    return ctx.json({ error: "Reaction not found" }, 404);
+  }
+
+  return ctx.json(reactions[0]);
+}
+
 async function deleteReaction(ctx: Context) {
   const {
     playgroundId: playgroundIdString,
@@ -372,4 +405,5 @@ export default {
   deletePlayground,
   deleteLinkAction,
   deleteLinkReaction,
+  patchReactionSettings,
 };
