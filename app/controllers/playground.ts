@@ -201,13 +201,13 @@ async function addReaction(ctx: Context) {
   const playgroundId = parseInt(playgroundIdString);
   const reactionId = parseInt(reactionIdString);
 
-  await db.insert(reactionPlaygroundSchema).values({
+  const reactions = await db.insert(reactionPlaygroundSchema).values({
     playgroundId,
     reactionId,
     settings,
-  });
+  }).returning();
 
-  return ctx.json({ success: true }, 201);
+  return ctx.json(reactions[0], 201);
 }
 
 async function deleteReaction(ctx: Context) {

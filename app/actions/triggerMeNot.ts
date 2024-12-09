@@ -18,7 +18,7 @@ function base64Encode(actionId: number, playgroundId: number) {
 }
 
 async function OnFetch(
-  ctx: Context,
+  _ctx: Context,
   actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
   playgroundId: number,
 ) {
@@ -31,8 +31,6 @@ async function OnFetch(
       eq(actionPlaygroundSchema.id, actionPlayground.id),
     ),
   );
-
-  return ctx.json(settings, 301);
 }
 
 export default { OnFetch };
