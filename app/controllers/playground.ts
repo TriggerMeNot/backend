@@ -155,18 +155,21 @@ async function addAction(ctx: Context) {
 }
 
 async function deleteAction(ctx: Context) {
-  const { playgroundId: playgroundIdString, actionId: actionIdString } = ctx
+  const {
+    playgroundId: playgroundIdString,
+    actionId: actionPlaygroundIdString,
+  } = ctx
     .req.valid("param" as never);
 
   if (isNaN(parseInt(playgroundIdString))) {
     return ctx.json({ error: "Invalid playground ID" }, 400);
   }
-  if (isNaN(parseInt(actionIdString))) {
+  if (isNaN(parseInt(actionPlaygroundIdString))) {
     return ctx.json({ error: "Invalid action ID" }, 400);
   }
 
   const playgroundId = parseInt(playgroundIdString);
-  const actionId = parseInt(actionIdString);
+  const actionId = parseInt(actionPlaygroundIdString);
 
   const deleted = await db.delete(actionPlaygroundSchema).where(
     and(
@@ -208,18 +211,21 @@ async function addReaction(ctx: Context) {
 }
 
 async function deleteReaction(ctx: Context) {
-  const { playgroundId: playgroundIdString, reactionId: reactionIdString } = ctx
+  const {
+    playgroundId: playgroundIdString,
+    reactionId: reactionPlaygroundIdString,
+  } = ctx
     .req.valid("param" as never);
 
   if (isNaN(parseInt(playgroundIdString))) {
     return ctx.json({ error: "Invalid playground ID" }, 400);
   }
-  if (isNaN(parseInt(reactionIdString))) {
+  if (isNaN(parseInt(reactionPlaygroundIdString))) {
     return ctx.json({ error: "Invalid reaction ID" }, 400);
   }
 
   const playgroundId = parseInt(playgroundIdString);
-  const reactionId = parseInt(reactionIdString);
+  const reactionId = parseInt(reactionPlaygroundIdString);
 
   const deleted = await db.delete(reactionPlaygroundSchema).where(
     and(
@@ -236,7 +242,7 @@ async function deleteReaction(ctx: Context) {
 }
 
 async function linkReaction(ctx: Context) {
-  const { triggerId, reactionId } = ctx.req.valid("param" as never);
+  const { triggerId, reactionPlaygroundId } = ctx.req.valid("param" as never);
 
   const reactions = await db.select().from(reactionPlaygroundSchema)
     .where(eq(reactionPlaygroundSchema.id, triggerId))
@@ -249,7 +255,7 @@ async function linkReaction(ctx: Context) {
   const trigger = reactions[0];
 
   const targetReactions = await db.select().from(reactionPlaygroundSchema)
-    .where(eq(reactionPlaygroundSchema.id, reactionId))
+    .where(eq(reactionPlaygroundSchema.id, reactionPlaygroundId))
     .limit(1);
 
   if (!targetReactions.length) {
@@ -266,14 +272,14 @@ async function linkReaction(ctx: Context) {
 
   await db.insert(reactionLinkSchema).values({
     triggerId,
-    reactionId,
+    reactionId: reactionPlaygroundId,
   });
 
   return ctx.json({ success: true }, 201);
 }
 
 async function linkAction(ctx: Context) {
-  const { triggerId, reactionId } = ctx.req.valid("param" as never);
+  const { triggerId, reactionPlaygroundId } = ctx.req.valid("param" as never);
 
   const actions = await db.select().from(actionPlaygroundSchema)
     .where(eq(actionPlaygroundSchema.id, triggerId))
@@ -286,7 +292,7 @@ async function linkAction(ctx: Context) {
   const trigger = actions[0];
 
   const targetReactions = await db.select().from(reactionPlaygroundSchema)
-    .where(eq(reactionPlaygroundSchema.id, reactionId))
+    .where(eq(reactionPlaygroundSchema.id, reactionPlaygroundId))
     .limit(1);
 
   if (!targetReactions.length) {
@@ -303,7 +309,7 @@ async function linkAction(ctx: Context) {
 
   await db.insert(actionLinkSchema).values({
     triggerId,
-    reactionId,
+    reactionId: reactionPlaygroundId,
   });
 
   return ctx.json({ success: true }, 201);
