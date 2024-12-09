@@ -3,8 +3,8 @@ import ReactionTrigger from "../types/ReactionTrigger.ts";
 interface FetchSettings {
   url: string;
   method: string;
-  headers: Record<string, string>;
-  body: string;
+  headers?: Record<string, string>;
+  body?: string;
 }
 
 async function fetchRequest(reaction: ReactionTrigger) {
@@ -12,8 +12,11 @@ async function fetchRequest(reaction: ReactionTrigger) {
 
   const fetchOptions: RequestInit = {
     method: settings.method,
-    headers: settings.headers,
   };
+
+  if (settings.headers) {
+    fetchOptions.headers = settings.headers;
+  }
 
   if (settings.method !== "GET" && settings.method !== "HEAD") {
     fetchOptions.body = settings.body;

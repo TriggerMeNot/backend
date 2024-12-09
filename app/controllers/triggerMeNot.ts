@@ -1,12 +1,9 @@
 import { Context } from "@hono";
 import { db } from "../db/config.ts";
 import { and, eq } from "drizzle-orm/expressions";
-import { actions as actionSchema } from "../schemas/actions.ts";
 import { actionsPlayground as actionPlaygroundSchema } from "../schemas/actionsPlayground.ts";
 import { actionTrigger } from "../utils/trigger.ts";
-import { SERVICES } from "../db/seed.ts";
 
-const SERVICE_NAME = "TriggerMeNot";
 
 function base64Decode(token: string) {
   // Decode the base64 token
@@ -27,21 +24,10 @@ async function OnFetch(ctx: Context) {
   const { token } = ctx.req.valid("param" as never);
   const { actionId, playgroundId } = base64Decode(token);
 
-  const actions = await db.select().from(actionSchema).where(
-    and(
-      eq(actionSchema.id, actionId),
-      eq(actionSchema.serviceId, SERVICES[SERVICE_NAME].id!),
-    ),
-  ).limit(1);
-
-  if (!actions.length) {
-    return ctx.json({ error: "Action not found" }, 404);
-  }
-
   const actionsPlayground = await db.select().from(actionPlaygroundSchema)
     .where(
       and(
-        eq(actionPlaygroundSchema.actionId, actionId),
+        eq(actionPlaygroundSchema.id, actionId),
         eq(actionPlaygroundSchema.playgroundId, playgroundId),
       ),
     ).limit(1);
