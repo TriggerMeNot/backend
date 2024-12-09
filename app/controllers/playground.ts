@@ -35,18 +35,36 @@ async function get(ctx: Context) {
     return ctx.json({ error: "Playground not found" }, 404);
   }
 
-  const reactions = await db.select().from(reactionPlaygroundSchema).where(
-    eq(reactionPlaygroundSchema.playgroundId, id),
-  );
-
   const actions = await db.select().from(actionPlaygroundSchema).where(
     eq(actionPlaygroundSchema.playgroundId, id),
   );
 
+  const reactions = await db.select().from(reactionPlaygroundSchema).where(
+    eq(reactionPlaygroundSchema.playgroundId, id),
+  );
+
+  const linksActions = [];
+  for (const action of actions) {
+    const linkedActions = await db.select().from(actionLinkSchema).where(
+      eq(actionLinkSchema.triggerId, action.id),
+    );
+    linksActions.push(...linkedActions);
+  }
+
+  const linksReactions = [];
+  for (const reaction of reactions) {
+    const linkedReactions = await db.select().from(reactionLinkSchema).where(
+      eq(reactionLinkSchema.triggerId, reaction.id),
+    );
+    linksReactions.push(...linkedReactions);
+  }
+
   return ctx.json({
     ...playgrounds[0],
-    reactions,
     actions,
+    reactions,
+    linksActions,
+    linksReactions,
   });
 }
 

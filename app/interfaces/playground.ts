@@ -37,8 +37,10 @@ export default {
     Response: z.object({
       id: z.number(),
       name: z.string(),
-      actions: z.array(z.number()),
-      reactions: z.array(z.number()),
+      actions: z.array(z.object({})),
+      reactions: z.array(z.object({})),
+      linksActions: z.array(z.object({})),
+      linksReactions: z.array(z.object({})),
     }),
   },
 
