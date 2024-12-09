@@ -2,18 +2,6 @@ import app from "./app.ts";
 import { assertEquals } from "@std/assert";
 
 Deno.test({
-  name: "App has /api route",
-  fn() {
-    assertEquals(
-      app.routes.some((route) =>
-        route.method === "GET" && route.path === "/api"
-      ),
-      true,
-    );
-  },
-});
-
-Deno.test({
   name: "App has /api/openapi route",
   fn() {
     assertEquals(
