@@ -40,6 +40,43 @@ playgroundRouter.post(
   playgroundController.create,
 );
 
+playgroundRouter.patch(
+  "/:id",
+  describeRoute({
+    tags: ["playground"],
+    description: "Update a playground",
+    responses: {
+      200: {
+        description: "Successful playground response",
+      },
+      400: {
+        description: "Bad request",
+      },
+    },
+  }),
+  validator("param", PlaygroundSchema.Patch.Param),
+  validator("json", PlaygroundSchema.Patch.Body),
+  playgroundController.patch,
+);
+
+playgroundRouter.delete(
+  "/:id",
+  describeRoute({
+    tags: ["playground"],
+    description: "Delete a playground",
+    responses: {
+      200: {
+        description: "Successful delete response",
+      },
+      400: {
+        description: "Bad request",
+      },
+    },
+  }),
+  validator("param", PlaygroundSchema.Delete.Param),
+  playgroundController.deletePlayground,
+);
+
 playgroundRouter.get(
   "/:id",
   describeRoute({

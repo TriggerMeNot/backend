@@ -78,6 +78,49 @@ async function create(ctx: Context) {
   return ctx.json(playground[0], 201);
 }
 
+async function patch(ctx: Context) {
+  const { id: idString } = ctx.req.valid("param" as never);
+  const { name } = ctx.req.valid("json" as never);
+
+  if (isNaN(parseInt(idString))) {
+    return ctx.json({ error: "Invalid playground ID" }, 400);
+  }
+
+  const id = parseInt(idString);
+
+  const playgrounds = await db.update(playgroundSchema).set({
+    name,
+  }).where(
+    eq(playgroundSchema.id, id),
+  ).returning();
+
+  if (!playgrounds.length) {
+    return ctx.json({ error: "Playground not found" }, 404);
+  }
+
+  return ctx.json(playgrounds[0]);
+}
+
+async function deletePlayground(ctx: Context) {
+  const { id: idString } = ctx.req.valid("param" as never);
+
+  if (isNaN(parseInt(idString))) {
+    return ctx.json({ error: "Invalid playground ID" }, 400);
+  }
+
+  const id = parseInt(idString);
+
+  const deleted = await db.delete(playgroundSchema).where(
+    eq(playgroundSchema.id, id),
+  );
+
+  if (deleted.rowCount === 0) {
+    return ctx.json({ error: "Playground not found" }, 404);
+  }
+
+  return ctx.json({ success: true });
+}
+
 async function addAction(ctx: Context) {
   const { playgroundId: playgroundIdString, actionId: actionIdString } = ctx
     .req.valid("param" as never);
@@ -276,4 +319,6 @@ export default {
   linkAction,
   deleteAction,
   deleteReaction,
+  patch,
+  deletePlayground,
 };
