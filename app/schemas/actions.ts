@@ -5,9 +5,10 @@ export const actions = pgTable(
   "actions",
   {
     id: serial("id").primaryKey().notNull(),
-    serviceId: integer("service_id")
-      .notNull()
-      .references(() => services.id, { onDelete: "cascade" }),
+    serviceId: integer("service_id").notNull().references(
+      () => services.id,
+      { onDelete: "cascade" },
+    ),
     name: text("name").notNull(),
     description: text("description").notNull(),
   },
