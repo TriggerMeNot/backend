@@ -187,7 +187,7 @@ playgroundRouter.post(
 );
 
 playgroundRouter.delete(
-  "/link/:linkId",
+  "/link/action/:linkId",
   describeRoute({
     tags: ["playground"],
     description: "Delete a link",
@@ -223,7 +223,7 @@ playgroundRouter.post(
 );
 
 playgroundRouter.delete(
-  "/link/:linkId",
+  "/link/reaction/:linkId",
   describeRoute({
     tags: ["playground"],
     description: "Delete a link",
