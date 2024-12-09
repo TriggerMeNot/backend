@@ -9,9 +9,27 @@ export default {
       username: z.string(),
     }),
   },
+
   GetUser: {
     Param: z.object({
       id: z.string(),
+    }),
+    Response: z.object({
+      id: z.number(),
+      email: z.string().email(),
+      username: z.string(),
+    }),
+    ResponseFailure: z.object({
+      error: z.string(),
+    }),
+  },
+
+  PatchUser: {
+    Param: z.object({
+      id: z.string(),
+    }),
+    Body: z.object({
+      username: z.string(),
     }),
     Response: z.object({
       id: z.number(),

@@ -56,4 +56,33 @@ userRouter.get(
   UserController.getUser,
 );
 
+userRouter.patch(
+  "/:id",
+  describeRoute({
+    tags: ["user"],
+    description: "Update the username of a user by ID.",
+    responses: {
+      200: {
+        description: "User information",
+        content: {
+          "application/json": {
+            schema: resolver(UserSchema.PatchUser.Response),
+          },
+        },
+      },
+      404: {
+        description: "User not found",
+        content: {
+          "application/json": {
+            schema: resolver(UserSchema.PatchUser.ResponseFailure),
+          },
+        },
+      },
+    },
+  }),
+  validator("param", UserSchema.PatchUser.Param),
+  validator("json", UserSchema.PatchUser.Body),
+  UserController.patchUser,
+);
+
 export default userRouter;
