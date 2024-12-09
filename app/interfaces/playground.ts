@@ -68,7 +68,17 @@ export default {
     }),
   },
 
-  deleteReaction: {
+  PatchReactionSettings: {
+    Param: z.object({
+      playgroundId: z.string(),
+      reactionPlaygroundId: z.string(),
+    }),
+    Body: z.object({
+      settings: z.record(z.any()),
+    }),
+  },
+
+  DeleteReaction: {
     Param: z.object({
       playgroundId: z.string(),
       reactionPlaygroundId: z.string(),
