@@ -8,8 +8,9 @@ export const actionsPlayground = pgTable("actionsPlayground", {
     () => playgrounds.id,
     { onDelete: "cascade" },
   ),
-  actionId: integer("action_id").notNull().references(() => actions.id, {
-    onDelete: "cascade",
-  }),
+  actionId: integer("action_id").notNull().references(
+    () => actions.id,
+    { onDelete: "cascade" },
+  ),
   settings: json("settings"),
 });
