@@ -175,9 +175,8 @@ async function addAction(ctx: Context) {
 async function deleteAction(ctx: Context) {
   const {
     playgroundId: playgroundIdString,
-    actionId: actionPlaygroundIdString,
-  } = ctx
-    .req.valid("param" as never);
+    actionPlaygroundId: actionPlaygroundIdString,
+  } = ctx.req.valid("param" as never);
 
   if (isNaN(parseInt(playgroundIdString))) {
     return ctx.json({ error: "Invalid playground ID" }, 400);
@@ -205,8 +204,7 @@ async function deleteAction(ctx: Context) {
 
 async function addReaction(ctx: Context) {
   const { playgroundId: playgroundIdString, reactionId: reactionIdString } = ctx
-    .req
-    .valid("param" as never);
+    .req.valid("param" as never);
   const { settings } = ctx.req.valid("json" as never);
 
   if (isNaN(parseInt(playgroundIdString))) {
@@ -231,9 +229,8 @@ async function addReaction(ctx: Context) {
 async function deleteReaction(ctx: Context) {
   const {
     playgroundId: playgroundIdString,
-    reactionId: reactionPlaygroundIdString,
-  } = ctx
-    .req.valid("param" as never);
+    reactionPlaygroundId: reactionPlaygroundIdString,
+  } = ctx.req.valid("param" as never);
 
   if (isNaN(parseInt(playgroundIdString))) {
     return ctx.json({ error: "Invalid playground ID" }, 400);
