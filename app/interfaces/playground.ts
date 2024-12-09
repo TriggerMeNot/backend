@@ -82,10 +82,22 @@ export default {
     }),
   },
 
+  DeleteLinkAction: {
+    Param: z.object({
+      linkId: z.string(),
+    }),
+  },
+
   LinkReaction: {
     Param: z.object({
       triggerId: z.string(),
       actionPlaygroundId: z.string(),
+    }),
+  },
+
+  DeleteLinkReaction: {
+    Param: z.object({
+      linkId: z.string(),
     }),
   },
 };

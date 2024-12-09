@@ -186,6 +186,24 @@ playgroundRouter.post(
   playgroundController.linkAction,
 );
 
+playgroundRouter.delete(
+  "/link/:linkId",
+  describeRoute({
+    tags: ["playground"],
+    description: "Delete a link",
+    responses: {
+      200: {
+        description: "Successful delete response",
+      },
+      400: {
+        description: "Bad request",
+      },
+    },
+  }),
+  validator("param", PlaygroundSchema.DeleteLinkAction.Param),
+  playgroundController.deleteLinkAction,
+);
+
 playgroundRouter.post(
   "/link/reaction/:triggerId/action/:reactionPlaygroundId",
   describeRoute({
@@ -202,6 +220,24 @@ playgroundRouter.post(
   }),
   validator("param", PlaygroundSchema.LinkReaction.Param),
   playgroundController.linkReaction,
+);
+
+playgroundRouter.delete(
+  "/link/:linkId",
+  describeRoute({
+    tags: ["playground"],
+    description: "Delete a link",
+    responses: {
+      200: {
+        description: "Successful delete response",
+      },
+      400: {
+        description: "Bad request",
+      },
+    },
+  }),
+  validator("param", PlaygroundSchema.DeleteLinkReaction.Param),
+  playgroundController.deleteLinkReaction,
 );
 
 export default playgroundRouter;
