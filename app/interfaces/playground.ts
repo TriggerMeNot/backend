@@ -52,7 +52,7 @@ export default {
   deleteAction: {
     Param: z.object({
       playgroundId: z.string(),
-      actionId: z.string(),
+      actionPlaygroundId: z.string(),
     }),
   },
 
@@ -69,21 +69,21 @@ export default {
   deleteReaction: {
     Param: z.object({
       playgroundId: z.string(),
-      reactionId: z.string(),
+      reactionPlaygroundId: z.string(),
     }),
   },
 
   LinkAction: {
     Param: z.object({
       triggerId: z.string(),
-      reactionId: z.string(),
+      reactionPlaygroundId: z.string(),
     }),
   },
 
   LinkReaction: {
     Param: z.object({
       triggerId: z.string(),
-      actionId: z.string(),
+      actionPlaygroundId: z.string(),
     }),
   },
 };

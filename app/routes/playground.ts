@@ -115,7 +115,7 @@ playgroundRouter.post(
 );
 
 playgroundRouter.delete(
-  "/:playgroundId/reaction/:reactionId",
+  "/:playgroundId/reaction/:reactionPlaygroundId",
   describeRoute({
     tags: ["playground"],
     description: "Delete a reaction from a playground",
@@ -151,7 +151,7 @@ playgroundRouter.post(
 );
 
 playgroundRouter.delete(
-  "/:playgroundId/action/:actionId",
+  "/:playgroundId/action/:actionPlaygroundId",
   describeRoute({
     tags: ["playground"],
     description: "Delete an action from a playground",
@@ -169,7 +169,7 @@ playgroundRouter.delete(
 );
 
 playgroundRouter.post(
-  "/link/action/:triggerId/reaction/:reactionId",
+  "/link/action/:triggerId/reaction/:reactionPlaygroundId",
   describeRoute({
     tags: ["playground"],
     description: "Link an action to a reaction",
@@ -187,7 +187,7 @@ playgroundRouter.post(
 );
 
 playgroundRouter.post(
-  "/link/reaction/:triggerId/action/:reactionId",
+  "/link/reaction/:triggerId/action/:reactionPlaygroundId",
   describeRoute({
     tags: ["playground"],
     description: "Link a reaction to an action",
