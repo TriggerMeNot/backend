@@ -296,6 +296,20 @@ async function linkReaction(ctx: Context) {
   return ctx.json({ success: true }, 201);
 }
 
+async function deleteLinkReaction(ctx: Context) {
+  const { linkId } = ctx.req.valid("param" as never);
+
+  const deleted = await db.delete(reactionLinkSchema).where(
+    eq(reactionLinkSchema.id, linkId),
+  );
+
+  if (deleted.rowCount === 0) {
+    return ctx.json({ error: "Link not found" }, 404);
+  }
+
+  return ctx.json({ success: true });
+}
+
 async function linkAction(ctx: Context) {
   const { triggerId, reactionPlaygroundId } = ctx.req.valid("param" as never);
 
@@ -333,6 +347,20 @@ async function linkAction(ctx: Context) {
   return ctx.json({ success: true }, 201);
 }
 
+async function deleteLinkAction(ctx: Context) {
+  const { linkId } = ctx.req.valid("param" as never);
+
+  const deleted = await db.delete(actionLinkSchema).where(
+    eq(actionLinkSchema.id, linkId),
+  );
+
+  if (deleted.rowCount === 0) {
+    return ctx.json({ error: "Link not found" }, 404);
+  }
+
+  return ctx.json({ success: true });
+}
+
 export default {
   list,
   create,
@@ -345,4 +373,6 @@ export default {
   deleteReaction,
   patch,
   deletePlayground,
+  deleteLinkAction,
+  deleteLinkReaction,
 };
