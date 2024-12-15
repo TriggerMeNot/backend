@@ -1,6 +1,6 @@
-// import { Context } from "@hono";
 import { db } from "../db/config.ts";
 import { eq } from "drizzle-orm/expressions";
+import { playgrounds as playgroundsSchema } from "../schemas/playgrounds.ts";
 import { reactions as reactionsSchema } from "../schemas/reactions.ts";
 import { reactionsPlayground as reactionsPlaygroundSchema } from "../schemas/reactionsPlayground.ts";
 import { reactionLinks as reactionLinkSchema } from "../schemas/reactionLinks.ts";
@@ -22,9 +22,20 @@ async function trigger(
   }
   const reaction = reactions[0];
 
+  const playgrounds = await db.select().from(playgroundsSchema)
+    .where(
+      eq(playgroundsSchema.id, reactionPlayground.playgroundId),
+    ).limit(1);
+
+  if (!playgrounds.length) {
+    return;
+  }
+  const playground = playgrounds[0];
+
   Reaction.run({
     id: reactionPlayground.id,
     name: reaction.name,
+    userId: playground.userId,
     settings: reactionPlayground.settings,
     param: param,
   });
