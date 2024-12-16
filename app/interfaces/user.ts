@@ -29,7 +29,7 @@ export default {
       id: z.string(),
     }),
     Body: z.object({
-      username: z.string(),
+      username: z.string().optional(),
     }),
     Response: z.object({
       id: z.number(),
