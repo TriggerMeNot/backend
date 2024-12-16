@@ -49,6 +49,21 @@ export default {
       playgroundId: z.string(),
       actionId: z.string(),
     }),
+    Body: z.object({
+      x: z.number(),
+      y: z.number(),
+    }),
+  },
+
+  PatchAction: {
+    Param: z.object({
+      playgroundId: z.string(),
+      actionPlaygroundId: z.string(),
+    }),
+    Body: z.object({
+      x: z.number(),
+      y: z.number(),
+    }),
   },
 
   deleteAction: {
@@ -65,16 +80,20 @@ export default {
     }),
     Body: z.object({
       settings: z.record(z.any()),
+      x: z.number(),
+      y: z.number(),
     }),
   },
 
-  PatchReactionSettings: {
+  PatchReaction: {
     Param: z.object({
       playgroundId: z.string(),
       reactionPlaygroundId: z.string(),
     }),
     Body: z.object({
       settings: z.record(z.any()),
+      x: z.number(),
+      y: z.number(),
     }),
   },
 
