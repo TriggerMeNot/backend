@@ -120,7 +120,7 @@ export default {
   LinkReaction: {
     Param: z.object({
       triggerId: z.string(),
-      actionPlaygroundId: z.string(),
+      reactionPlaygroundId: z.string(),
     }),
   },
 
