@@ -115,7 +115,7 @@ playgroundRouter.post(
 );
 
 playgroundRouter.patch(
-  "/:playgroundId/reaction/:reactionPlaygroundId/settings",
+  "/:playgroundId/reaction/:reactionPlaygroundId",
   describeRoute({
     tags: ["playground"],
     description: "Update a reaction in a playground",
@@ -128,9 +128,9 @@ playgroundRouter.patch(
       },
     },
   }),
-  validator("param", PlaygroundSchema.PatchReactionSettings.Param),
-  validator("json", PlaygroundSchema.PatchReactionSettings.Body),
-  playgroundController.patchReactionSettings,
+  validator("param", PlaygroundSchema.PatchReaction.Param),
+  validator("json", PlaygroundSchema.PatchReaction.Body),
+  playgroundController.patchReaction,
 );
 
 playgroundRouter.delete(
@@ -167,6 +167,25 @@ playgroundRouter.post(
   }),
   validator("param", PlaygroundSchema.AddAction.Param),
   playgroundController.addAction,
+);
+
+playgroundRouter.patch(
+  "/:playgroundId/action/:actionPlaygroundId",
+  describeRoute({
+    tags: ["playground"],
+    description: "Update an action in a playground",
+    responses: {
+      200: {
+        description: "Successful action response",
+      },
+      400: {
+        description: "Bad request",
+      },
+    },
+  }),
+  validator("param", PlaygroundSchema.PatchAction.Param),
+  validator("json", PlaygroundSchema.PatchAction.Body),
+  playgroundController.patchAction,
 );
 
 playgroundRouter.delete(

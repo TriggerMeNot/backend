@@ -142,6 +142,7 @@ async function deletePlayground(ctx: Context) {
 async function addAction(ctx: Context) {
   const { playgroundId: playgroundIdString, actionId: actionIdString } = ctx
     .req.valid("param" as never);
+  const { x, y } = ctx.req.valid("json" as never);
 
   if (isNaN(parseInt(playgroundIdString))) {
     return ctx.json({ error: "Invalid playground ID" }, 400);
@@ -156,6 +157,8 @@ async function addAction(ctx: Context) {
   const actionsPlayground = await db.insert(actionPlaygroundSchema).values({
     playgroundId,
     actionId,
+    x,
+    y,
   }).returning();
 
   const actions = await db.select().from(actionSchema).where(
@@ -170,6 +173,40 @@ async function addAction(ctx: Context) {
     actionsPlayground[0],
     playgroundId,
   );
+}
+
+async function patchAction(ctx: Context) {
+  const {
+    playgroundId: playgroundIdString,
+    actionPlaygroundId: actionPlaygroundIdString,
+  } = ctx.req.valid("param" as never);
+  const { x, y } = ctx.req.valid("json" as never);
+
+  if (isNaN(parseInt(playgroundIdString))) {
+    return ctx.json({ error: "Invalid playground ID" }, 400);
+  }
+  if (isNaN(parseInt(actionPlaygroundIdString))) {
+    return ctx.json({ error: "Invalid action ID" }, 400);
+  }
+
+  const playgroundId = parseInt(playgroundIdString);
+  const actionId = parseInt(actionPlaygroundIdString);
+
+  const actions = await db.update(actionPlaygroundSchema).set({
+    x,
+    y,
+  }).where(
+    and(
+      eq(actionPlaygroundSchema.id, actionId),
+      eq(actionPlaygroundSchema.playgroundId, playgroundId),
+    ),
+  ).returning();
+
+  if (!actions.length) {
+    return ctx.json({ error: "Action not found" }, 404);
+  }
+
+  return ctx.json(actions[0]);
 }
 
 async function deleteAction(ctx: Context) {
@@ -205,7 +242,7 @@ async function deleteAction(ctx: Context) {
 async function addReaction(ctx: Context) {
   const { playgroundId: playgroundIdString, reactionId: reactionIdString } = ctx
     .req.valid("param" as never);
-  const { settings } = ctx.req.valid("json" as never);
+  const { settings, x, y } = ctx.req.valid("json" as never);
 
   if (isNaN(parseInt(playgroundIdString))) {
     return ctx.json({ error: "Invalid playground ID" }, 400);
@@ -221,17 +258,19 @@ async function addReaction(ctx: Context) {
     playgroundId,
     reactionId,
     settings,
+    x,
+    y,
   }).returning();
 
   return ctx.json(reactions[0], 201);
 }
 
-async function patchReactionSettings(ctx: Context) {
+async function patchReaction(ctx: Context) {
   const {
     playgroundId: playgroundIdString,
     reactionPlaygroundId: reactionPlaygroundIdString,
   } = ctx.req.valid("param" as never);
-  const { settings } = ctx.req.valid("json" as never);
+  const { settings, x, y } = ctx.req.valid("json" as never);
 
   if (isNaN(parseInt(playgroundIdString))) {
     return ctx.json({ error: "Invalid playground ID" }, 400);
@@ -245,6 +284,8 @@ async function patchReactionSettings(ctx: Context) {
 
   const reactions = await db.update(reactionPlaygroundSchema).set({
     settings,
+    x,
+    y,
   }).where(
     and(
       eq(reactionPlaygroundSchema.id, reactionId),
@@ -405,5 +446,6 @@ export default {
   deletePlayground,
   deleteLinkAction,
   deleteLinkReaction,
-  patchReactionSettings,
+  patchReaction,
+  patchAction,
 };

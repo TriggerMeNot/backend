@@ -13,4 +13,6 @@ export const reactionsPlayground = pgTable("reactionsPlayground", {
     { onDelete: "cascade" },
   ),
   settings: json("settings"),
+  x: integer("x").notNull(),
+  y: integer("y").notNull(),
 });
