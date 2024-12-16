@@ -7,7 +7,7 @@ export default {
       id: z.string(),
     }),
     Body: z.object({
-      name: z.string(),
+      name: z.string().optional(),
     }),
     Response: z.object({
       id: z.number(),
@@ -61,8 +61,8 @@ export default {
       actionPlaygroundId: z.string(),
     }),
     Body: z.object({
-      x: z.number(),
-      y: z.number(),
+      x: z.number().optional(),
+      y: z.number().optional(),
     }),
   },
 
@@ -92,8 +92,8 @@ export default {
     }),
     Body: z.object({
       settings: z.record(z.any()),
-      x: z.number(),
-      y: z.number(),
+      x: z.number().optional(),
+      y: z.number().optional(),
     }),
   },
 
