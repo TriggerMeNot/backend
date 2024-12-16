@@ -166,6 +166,7 @@ playgroundRouter.post(
     },
   }),
   validator("param", PlaygroundSchema.AddAction.Param),
+  validator("json", PlaygroundSchema.AddAction.Body),
   playgroundController.addAction,
 );
 
