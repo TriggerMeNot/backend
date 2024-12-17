@@ -8,6 +8,7 @@ import { actionsPlayground as actionPlaygroundSchema } from "../schemas/actionsP
 import { reactionLinks as reactionLinkSchema } from "../schemas/reactionLinks.ts";
 import { actionLinks as actionLinkSchema } from "../schemas/actionLinks.ts";
 import actionController from "../actions/actions.ts";
+import { actionTrigger } from "../utils/trigger.ts";
 
 async function list(ctx: Context) {
   const userId = ctx.get("jwtPayload").sub;
@@ -239,6 +240,43 @@ async function deleteAction(ctx: Context) {
   return ctx.json({ success: true });
 }
 
+async function runAction(ctx: Context) {
+  const {
+    playgroundId: playgroundIdString,
+    actionPlaygroundId: actionPlaygroundIdString,
+  } = ctx
+    .req.valid("param" as never);
+  const {
+    params,
+  } = ctx.req.valid("json" as never);
+
+  if (isNaN(parseInt(playgroundIdString))) {
+    return ctx.json({ error: "Invalid playground ID" }, 400);
+  }
+  if (isNaN(parseInt(actionPlaygroundIdString))) {
+    return ctx.json({ error: "Invalid action ID" }, 400);
+  }
+
+  const playgroundId = parseInt(playgroundIdString);
+  const actionId = parseInt(actionPlaygroundIdString);
+
+  const actions = await db.select().from(actionPlaygroundSchema).where(
+    and(
+      eq(actionPlaygroundSchema.id, actionId),
+      eq(actionPlaygroundSchema.playgroundId, playgroundId),
+    ),
+  ).limit(1);
+
+  if (!actions.length) {
+    return ctx.json({ error: "Action not found" }, 404);
+  }
+
+  const action = actions[0];
+
+  actionTrigger(action.id, params);
+  return ctx.json({ success: true });
+}
+
 async function addReaction(ctx: Context) {
   const { playgroundId: playgroundIdString, reactionId: reactionIdString } = ctx
     .req.valid("param" as never);
@@ -448,4 +486,5 @@ export default {
   deleteLinkReaction,
   patchReaction,
   patchAction,
+  runAction,
 };
