@@ -73,6 +73,16 @@ export default {
     }),
   },
 
+  RunAction: {
+    Param: z.object({
+      playgroundId: z.string(),
+      actionPlaygroundId: z.string(),
+    }),
+    Body: z.object({
+      params: z.record(z.any()),
+    }),
+  },
+
   AddReaction: {
     Param: z.object({
       playgroundId: z.string(),

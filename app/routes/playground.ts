@@ -279,4 +279,23 @@ playgroundRouter.delete(
   playgroundController.deleteLinkReaction,
 );
 
+playgroundRouter.post(
+  "/:playgroundId/action/:actionPlaygroundId/run",
+  describeRoute({
+    tags: ["playground"],
+    description: "Run an action in a playground",
+    responses: {
+      200: {
+        description: "Successful run response",
+      },
+      400: {
+        description: "Bad request",
+      },
+    },
+  }),
+  validator("param", PlaygroundSchema.RunAction.Param),
+  validator("json", PlaygroundSchema.RunAction.Body),
+  playgroundController.runAction,
+);
+
 export default playgroundRouter;
