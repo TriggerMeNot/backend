@@ -1,4 +1,4 @@
-import { integer, json, pgTable, serial } from "drizzle-orm/pg-core";
+import { integer, jsonb, pgTable, serial } from "drizzle-orm/pg-core";
 import { actions } from "./actions.ts";
 import { playgrounds } from "./playgrounds.ts";
 
@@ -12,7 +12,7 @@ export const actionsPlayground = pgTable("actionsPlayground", {
     () => actions.id,
     { onDelete: "cascade" },
   ),
-  settings: json("settings"),
+  settings: jsonb("settings"),
   x: integer("x").notNull(),
   y: integer("y").notNull(),
 });

@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm/expressions";
 import { services as serviceSchema } from "../schemas/services.ts";
 import { actions as actionSchema } from "../schemas/actions.ts";
 import { reactions as reactionSchema } from "../schemas/reactions.ts";
+import { set } from "zod";
 
 function root(ctx: Context) {
   return ctx.text("Hello Hono!");
@@ -18,6 +19,7 @@ async function about(ctx: Context) {
         id: actionSchema.id,
         name: actionSchema.name,
         description: actionSchema.description,
+        settings: actionSchema.settings,
       }).from(actionSchema).where(
         eq(actionSchema.serviceId, service.id),
       ),
@@ -25,6 +27,7 @@ async function about(ctx: Context) {
         id: reactionSchema.id,
         name: reactionSchema.name,
         description: reactionSchema.description,
+        settings: reactionSchema.settings,
       }).from(reactionSchema).where(
         eq(reactionSchema.serviceId, service.id),
       ),
