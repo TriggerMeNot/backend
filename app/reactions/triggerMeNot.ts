@@ -1,14 +1,8 @@
 import ReactionTrigger from "../types/ReactionTrigger.ts";
-
-interface FetchSettings {
-  url: string;
-  method: string;
-  headers?: Record<string, string>;
-  body?: string;
-}
+import { FetchSettings } from "../interfaces/triggerMeNot.ts";
 
 async function fetchRequest(reaction: ReactionTrigger) {
-  const settings = reaction.settings as FetchSettings;
+  const settings = FetchSettings.parse(reaction.settings);
 
   const fetchOptions: RequestInit = {
     method: settings.method,

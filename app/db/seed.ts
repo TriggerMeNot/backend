@@ -3,33 +3,47 @@ import { services as serviceSchema } from "../schemas/services.ts";
 import { reactions as reactionSchema } from "../schemas/reactions.ts";
 import { actions as actionSchema } from "../schemas/actions.ts";
 import { and, eq } from "drizzle-orm/expressions";
+import { zodToJsonSchema } from "zod-to-json-schema";
+
+import { FetchSettings } from "../interfaces/triggerMeNot.ts";
+import { GithubIssueSettings } from "../interfaces/github.ts";
+
+interface Element {
+  id?: number;
+  description: string;
+  settings?: Record<string, unknown>;
+}
 
 interface Service {
   id?: number;
-  reactions?: Record<string, { id?: number; description: string }>;
-  actions?: Record<string, { id?: number; description: string }>;
+  actions?: Record<string, Element>;
+  reactions?: Record<string, Element>;
 }
 
 const SERVICES: Record<string, Service> = {
   "TriggerMeNot": {
-    reactions: {
-      "Fetch Request": {
-        description: "Fetch a URL",
-      },
-    },
     actions: {
       "On Fetch": {
         description: "When it fetches",
       },
     },
+    reactions: {
+      "Fetch Request": {
+        description: "Fetch a URL",
+        // @ts-ignore type mismatch
+        settings: zodToJsonSchema(FetchSettings),
+      },
+    },
   },
   "GitHub": {
+    actions: {},
     reactions: {
       "Create Issue": {
         description: "Create an issue in a repository",
+        // @ts-ignore type mismatch
+        settings: zodToJsonSchema(GithubIssueSettings),
       },
     },
-    actions: {},
   },
 };
 
@@ -61,6 +75,7 @@ async function seedDatabase() {
           serviceId: service.id,
           name: reactionName,
           description: reaction.description,
+          settings: reaction.settings,
         }).onConflictDoNothing().returning();
 
         if (!reactionRecord.length) {
@@ -93,6 +108,7 @@ async function seedDatabase() {
           serviceId: service.id,
           name: actionName,
           description: action.description,
+          settings: action.settings,
         }).onConflictDoNothing().returning();
 
         if (!actionRecord.length) {

@@ -166,11 +166,9 @@ async function addAction(ctx: Context) {
     eq(actionSchema.id, actionId),
   ).limit(1);
 
-  const action = actions[0];
-
   return await actionController.init(
-    action.name,
     ctx,
+    actions[0],
     actionsPlayground[0],
     playgroundId,
   );

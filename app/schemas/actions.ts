@@ -1,4 +1,11 @@
-import { integer, pgTable, serial, text, unique } from "drizzle-orm/pg-core";
+import {
+  integer,
+  jsonb,
+  pgTable,
+  serial,
+  text,
+  unique,
+} from "drizzle-orm/pg-core";
 import { services } from "./services.ts";
 
 export const actions = pgTable(
@@ -11,6 +18,7 @@ export const actions = pgTable(
     ),
     name: text("name").notNull(),
     description: text("description").notNull(),
+    settings: jsonb("settings"),
   },
   (table) => {
     return {

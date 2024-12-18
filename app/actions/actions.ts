@@ -1,16 +1,17 @@
 import { Context } from "@hono";
 import { db } from "../db/config.ts";
 import { eq } from "drizzle-orm/expressions";
+import { actions as actionSchema } from "../schemas/actions.ts";
 import { actionsPlayground as actionPlaygroundSchema } from "../schemas/actionsPlayground.ts";
 import triggerMeNot from "./triggerMeNot.ts";
 
 async function init(
-  name: string,
   ctx: Context,
+  action: typeof actionSchema.$inferSelect,
   actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
   playgroundId: number,
 ) {
-  switch (name) {
+  switch (action.name) {
     case "On Fetch":
       await triggerMeNot.OnFetch(ctx, actionPlayground, playgroundId);
       break;
@@ -18,15 +19,16 @@ async function init(
       return ctx.json({ error: "Action not found" }, 404);
   }
 
-  const actions = await db.select().from(actionPlaygroundSchema).where(
-    eq(actionPlaygroundSchema.id, actionPlayground.id),
-  );
+  const actionPlaygrounds = await db.select().from(actionPlaygroundSchema)
+    .where(
+      eq(actionPlaygroundSchema.id, actionPlayground.id),
+    );
 
-  if (!actions.length) {
+  if (!actionPlaygrounds.length) {
     return ctx.json({ error: "Action not found" }, 404);
   }
 
-  return ctx.json(actions[0], 201);
+  return ctx.json(actionPlaygrounds[0], 201);
 }
 
 export default { init };
