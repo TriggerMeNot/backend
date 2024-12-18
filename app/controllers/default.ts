@@ -4,7 +4,6 @@ import { eq } from "drizzle-orm/expressions";
 import { services as serviceSchema } from "../schemas/services.ts";
 import { actions as actionSchema } from "../schemas/actions.ts";
 import { reactions as reactionSchema } from "../schemas/reactions.ts";
-import { set } from "zod";
 
 function root(ctx: Context) {
   return ctx.text("Hello Hono!");
