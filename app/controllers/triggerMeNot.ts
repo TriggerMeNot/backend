@@ -4,7 +4,6 @@ import { and, eq } from "drizzle-orm/expressions";
 import { actionsPlayground as actionPlaygroundSchema } from "../schemas/actionsPlayground.ts";
 import { actionTrigger } from "../utils/trigger.ts";
 
-
 function base64Decode(token: string) {
   // Decode the base64 token
   const decoded = atob(token);
@@ -21,7 +20,7 @@ function base64Decode(token: string) {
 }
 
 async function OnFetch(ctx: Context) {
-  const { token } = ctx.req.valid("param" as never);
+  const { token } = ctx.req.param();
   const { actionId, playgroundId } = base64Decode(token);
 
   const actionsPlayground = await db.select().from(actionPlaygroundSchema)

@@ -11,9 +11,6 @@ export default {
   },
 
   GetUser: {
-    Param: z.object({
-      id: z.string(),
-    }),
     Response: z.object({
       id: z.number(),
       email: z.string().email(),
@@ -25,9 +22,6 @@ export default {
   },
 
   PatchUser: {
-    Param: z.object({
-      id: z.string(),
-    }),
     Body: z.object({
       username: z.string().optional(),
     }),

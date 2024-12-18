@@ -19,12 +19,12 @@ async function self(ctx: Context) {
 }
 
 async function getUser(ctx: Context) {
-  const { id: stringId } = ctx.req.valid("param" as never);
+  const { id: idString } = ctx.req.param();
 
-  if (isNaN(parseInt(stringId))) {
+  if (isNaN(parseInt(idString))) {
     return ctx.json({ error: "Invalid user ID" }, 400);
   }
-  const id = parseInt(stringId);
+  const id = parseInt(idString);
 
   const user = await db.select({
     id: userSchema.id,
@@ -42,13 +42,13 @@ async function getUser(ctx: Context) {
 }
 
 async function patchUser(ctx: Context) {
-  const { id: stringId } = ctx.req.valid("param" as never);
+  const { id: idString } = ctx.req.param();
   const { username } = ctx.req.valid("json" as never);
 
-  if (isNaN(parseInt(stringId))) {
+  if (isNaN(parseInt(idString))) {
     return ctx.json({ error: "Invalid user ID" }, 400);
   }
-  const id = parseInt(stringId);
+  const id = parseInt(idString);
 
   const user = await db.update(userSchema).set({
     username,

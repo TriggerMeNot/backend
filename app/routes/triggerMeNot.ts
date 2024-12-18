@@ -1,8 +1,6 @@
 import { Hono } from "@hono";
 import { describeRoute } from "@hono-openapi";
-import { validator } from "@hono-openapi/zod";
 import triggerMeNotController from "../controllers/triggerMeNot.ts";
-import triggerMeNotSchema from "../interfaces/triggerMeNot.ts";
 
 const triggerMeNotRouter = new Hono();
 
@@ -20,7 +18,6 @@ triggerMeNotRouter.post(
       },
     },
   }),
-  validator("param", triggerMeNotSchema.OnFetch.Param),
   triggerMeNotController.OnFetch,
 );
 
