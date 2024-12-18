@@ -24,6 +24,10 @@ app.use(logger());
 app.use(prettyJSON());
 app.use(cors());
 
+app.get("/static/*", serveStatic({ precompressed: true }));
+app.use("/static/*", serveStatic({ root: "./static" }));
+app.use("/favicon.ico", serveStatic({ path: "./static/favicon.ico" }));
+
 app.route("/", defaultRouter);
 
 {
@@ -32,10 +36,6 @@ app.route("/", defaultRouter);
   apiRouter.use(registerMetrics);
   apiRouter.get("/metrics", printMetrics);
 }
-
-apiRouter.get("/static/*", serveStatic({ precompressed: true }));
-apiRouter.use("/static/*", serveStatic({ root: "./static" }));
-apiRouter.use("/favicon.ico", serveStatic({ path: "./static/favicon.ico" }));
 
 apiRouter.route("/auth", authRouter);
 apiRouter.route("/user", userRouter);
