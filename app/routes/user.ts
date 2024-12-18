@@ -52,7 +52,6 @@ userRouter.get(
       },
     },
   }),
-  validator("param", UserSchema.GetUser.Param),
   UserController.getUser,
 );
 
@@ -80,7 +79,6 @@ userRouter.patch(
       },
     },
   }),
-  validator("param", UserSchema.PatchUser.Param),
   validator("json", UserSchema.PatchUser.Body),
   UserController.patchUser,
 );

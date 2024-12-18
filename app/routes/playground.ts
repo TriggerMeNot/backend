@@ -54,7 +54,6 @@ playgroundRouter.patch(
       },
     },
   }),
-  validator("param", PlaygroundSchema.Patch.Param),
   validator("json", PlaygroundSchema.Patch.Body),
   playgroundController.patch,
 );
@@ -73,7 +72,6 @@ playgroundRouter.delete(
       },
     },
   }),
-  validator("param", PlaygroundSchema.Delete.Param),
   playgroundController.deletePlayground,
 );
 
@@ -91,7 +89,6 @@ playgroundRouter.get(
       },
     },
   }),
-  validator("param", PlaygroundSchema.Get.Param),
   playgroundController.get,
 );
 
@@ -109,7 +106,6 @@ playgroundRouter.post(
       },
     },
   }),
-  validator("param", PlaygroundSchema.AddReaction.Param),
   validator("json", PlaygroundSchema.AddReaction.Body),
   playgroundController.addReaction,
 );
@@ -128,7 +124,6 @@ playgroundRouter.patch(
       },
     },
   }),
-  validator("param", PlaygroundSchema.PatchReaction.Param),
   validator("json", PlaygroundSchema.PatchReaction.Body),
   playgroundController.patchReaction,
 );
@@ -147,7 +142,6 @@ playgroundRouter.delete(
       },
     },
   }),
-  validator("param", PlaygroundSchema.DeleteReaction.Param),
   playgroundController.deleteReaction,
 );
 
@@ -165,7 +159,6 @@ playgroundRouter.post(
       },
     },
   }),
-  validator("param", PlaygroundSchema.AddAction.Param),
   validator("json", PlaygroundSchema.AddAction.Body),
   playgroundController.addAction,
 );
@@ -184,7 +177,6 @@ playgroundRouter.patch(
       },
     },
   }),
-  validator("param", PlaygroundSchema.PatchAction.Param),
   validator("json", PlaygroundSchema.PatchAction.Body),
   playgroundController.patchAction,
 );
@@ -203,7 +195,6 @@ playgroundRouter.delete(
       },
     },
   }),
-  validator("param", PlaygroundSchema.deleteAction.Param),
   playgroundController.deleteAction,
 );
 
@@ -221,7 +212,6 @@ playgroundRouter.post(
       },
     },
   }),
-  validator("param", PlaygroundSchema.LinkAction.Param),
   playgroundController.linkAction,
 );
 
@@ -239,7 +229,6 @@ playgroundRouter.delete(
       },
     },
   }),
-  validator("param", PlaygroundSchema.DeleteLinkAction.Param),
   playgroundController.deleteLinkAction,
 );
 
@@ -257,7 +246,6 @@ playgroundRouter.post(
       },
     },
   }),
-  validator("param", PlaygroundSchema.LinkReaction.Param),
   playgroundController.linkReaction,
 );
 
@@ -275,7 +263,6 @@ playgroundRouter.delete(
       },
     },
   }),
-  validator("param", PlaygroundSchema.DeleteLinkReaction.Param),
   playgroundController.deleteLinkReaction,
 );
 
@@ -293,7 +280,6 @@ playgroundRouter.post(
       },
     },
   }),
-  validator("param", PlaygroundSchema.RunAction.Param),
   validator("json", PlaygroundSchema.RunAction.Body),
   playgroundController.runAction,
 );

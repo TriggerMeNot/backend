@@ -3,21 +3,12 @@ import "zod-openapi/extend";
 
 export default {
   Patch: {
-    Param: z.object({
-      id: z.string(),
-    }),
     Body: z.object({
       name: z.string().optional(),
     }),
     Response: z.object({
       id: z.number(),
       name: z.string(),
-    }),
-  },
-
-  Delete: {
-    Param: z.object({
-      id: z.string(),
     }),
   },
 
@@ -31,9 +22,6 @@ export default {
   },
 
   Get: {
-    Param: z.object({
-      id: z.string(),
-    }),
     Response: z.object({
       id: z.number(),
       name: z.string(),
@@ -45,10 +33,6 @@ export default {
   },
 
   AddAction: {
-    Param: z.object({
-      playgroundId: z.string(),
-      actionId: z.string(),
-    }),
     Body: z.object({
       x: z.number(),
       y: z.number(),
@@ -56,38 +40,19 @@ export default {
   },
 
   PatchAction: {
-    Param: z.object({
-      playgroundId: z.string(),
-      actionPlaygroundId: z.string(),
-    }),
     Body: z.object({
       x: z.number().optional(),
       y: z.number().optional(),
     }),
   },
 
-  deleteAction: {
-    Param: z.object({
-      playgroundId: z.string(),
-      actionPlaygroundId: z.string(),
-    }),
-  },
-
   RunAction: {
-    Param: z.object({
-      playgroundId: z.string(),
-      actionPlaygroundId: z.string(),
-    }),
     Body: z.object({
       params: z.record(z.any()),
     }),
   },
 
   AddReaction: {
-    Param: z.object({
-      playgroundId: z.string(),
-      reactionId: z.string(),
-    }),
     Body: z.object({
       settings: z.record(z.any()),
       x: z.number(),
@@ -96,47 +61,10 @@ export default {
   },
 
   PatchReaction: {
-    Param: z.object({
-      playgroundId: z.string(),
-      reactionPlaygroundId: z.string(),
-    }),
     Body: z.object({
       settings: z.record(z.any()),
       x: z.number().optional(),
       y: z.number().optional(),
-    }),
-  },
-
-  DeleteReaction: {
-    Param: z.object({
-      playgroundId: z.string(),
-      reactionPlaygroundId: z.string(),
-    }),
-  },
-
-  LinkAction: {
-    Param: z.object({
-      triggerId: z.string(),
-      reactionPlaygroundId: z.string(),
-    }),
-  },
-
-  DeleteLinkAction: {
-    Param: z.object({
-      linkId: z.string(),
-    }),
-  },
-
-  LinkReaction: {
-    Param: z.object({
-      triggerId: z.string(),
-      reactionPlaygroundId: z.string(),
-    }),
-  },
-
-  DeleteLinkReaction: {
-    Param: z.object({
-      linkId: z.string(),
     }),
   },
 };
