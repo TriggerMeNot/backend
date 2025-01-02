@@ -5,12 +5,13 @@ import { actions as actionSchema } from "../schemas/actions.ts";
 import { and, eq } from "drizzle-orm/expressions";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
-import { FetchSettings } from "../interfaces/triggerMeNot.ts";
+import { FetchSettings, OnFetchParams } from "../interfaces/triggerMeNot.ts";
 import { GithubIssueSettings } from "../interfaces/github.ts";
 
 interface Element {
   id?: number;
   description: string;
+  params?: Record<string, unknown>;
   settings?: Record<string, unknown>;
 }
 
@@ -25,12 +26,12 @@ const SERVICES: Record<string, Service> = {
     actions: {
       "On Fetch": {
         description: "When it fetches",
+        params: zodToJsonSchema(OnFetchParams),
       },
     },
     reactions: {
       "Fetch Request": {
         description: "Fetch a URL",
-        // @ts-ignore type mismatch
         settings: zodToJsonSchema(FetchSettings),
       },
     },
@@ -40,7 +41,6 @@ const SERVICES: Record<string, Service> = {
     reactions: {
       "Create Issue": {
         description: "Create an issue in a repository",
-        // @ts-ignore type mismatch
         settings: zodToJsonSchema(GithubIssueSettings),
       },
     },
@@ -108,6 +108,7 @@ async function seedDatabase() {
           serviceId: service.id,
           name: actionName,
           description: action.description,
+          params: action.params,
           settings: action.settings,
         }).onConflictDoNothing().returning();
 
