@@ -18,6 +18,7 @@ async function about(ctx: Context) {
         id: actionSchema.id,
         name: actionSchema.name,
         description: actionSchema.description,
+        params: actionSchema.params,
         settings: actionSchema.settings,
       }).from(actionSchema).where(
         eq(actionSchema.serviceId, service.id),

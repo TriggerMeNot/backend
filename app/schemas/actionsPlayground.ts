@@ -13,6 +13,7 @@ export const actionsPlayground = pgTable("actionsPlayground", {
     { onDelete: "cascade" },
   ),
   settings: jsonb("settings"),
+  params: jsonb("params"),
   x: integer("x").notNull(),
   y: integer("y").notNull(),
 });

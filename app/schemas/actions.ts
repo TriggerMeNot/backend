@@ -19,6 +19,7 @@ export const actions = pgTable(
     name: text("name").notNull(),
     description: text("description").notNull(),
     settings: jsonb("settings"),
+    params: jsonb("params"),
   },
   (table) => {
     return {

@@ -22,10 +22,10 @@ async function OnFetch(
   actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
   playgroundId: number,
 ) {
-  const settings = { token: base64Encode(actionPlayground.id, playgroundId) };
+  const params = { token: base64Encode(actionPlayground.id, playgroundId) };
 
   await db.update(actionPlaygroundSchema).set({
-    settings,
+    params,
   }).where(
     and(
       eq(actionPlaygroundSchema.id, actionPlayground.id),
