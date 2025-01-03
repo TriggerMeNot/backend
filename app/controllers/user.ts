@@ -15,17 +15,16 @@ async function self(ctx: Context) {
     eq(userSchema.id, userId),
   ).limit(1);
 
-  return ctx.json(user);
+  return ctx.json(user[0]);
 }
 
 async function getUser(ctx: Context) {
-  // @ts-ignore - The `param` validator is added by the `validator` middleware
-  const { id: stringId } = ctx.req.valid("param");
+  const { id: idString } = ctx.req.param();
 
-  if (isNaN(parseInt(stringId))) {
+  if (isNaN(parseInt(idString))) {
     return ctx.json({ error: "Invalid user ID" }, 400);
   }
-  const id = parseInt(stringId);
+  const id = parseInt(idString);
 
   const user = await db.select({
     id: userSchema.id,
@@ -42,4 +41,30 @@ async function getUser(ctx: Context) {
   return ctx.json(user);
 }
 
-export default { self, getUser };
+async function patchUser(ctx: Context) {
+  const { id: idString } = ctx.req.param();
+  const { username } = ctx.req.valid("json" as never);
+
+  if (isNaN(parseInt(idString))) {
+    return ctx.json({ error: "Invalid user ID" }, 400);
+  }
+  const id = parseInt(idString);
+
+  const user = await db.update(userSchema).set({
+    username,
+  }).where(
+    eq(userSchema.id, id),
+  ).returning({
+    id: userSchema.id,
+    email: userSchema.email,
+    username: userSchema.username,
+  });
+
+  if (!user) {
+    return ctx.json({ error: "User not found" }, 404);
+  }
+
+  return ctx.json(user[0]);
+}
+
+export default { self, getUser, patchUser };
