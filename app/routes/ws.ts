@@ -1,31 +1,25 @@
 import { Hono } from "@hono";
 import { describeRoute } from "@hono-openapi";
-import { upgradeWebSocket } from "@hono/deno";
-import wsController from "../controllers/ws.ts";
-import { resolver, validator } from "@hono-openapi/zod";
-import wsSchema from "../interfaces/ws.ts";
+import { handleWebSocket } from "../controllers/ws.ts";
 
 const wsRouter = new Hono();
 
-wsRouter.post(
+wsRouter.get(
   "/",
   describeRoute({
     tags: ["websocket"],
     description:
       "Establish a WebSocket connection for bidirectional communication.",
     responses: {
-      200: {
+      101: {
         description: "WebSocket connection established",
-        content: {
-          "application/json": {
-            schema: resolver(wsSchema.Connection.Response),
-          },
+        },
+      400: {
+        description: "Invalid WebSocket request",
         },
       },
-    },
   }),
-  validator("form", wsSchema.Connection.Body),
-  upgradeWebSocket(wsController.handleWebSocket),
+  handleWebSocket,
 );
 
 export default wsRouter;

@@ -14,9 +14,9 @@ import playgroundRouter from "./routes/playground.ts";
 import triggerMeNotRouter from "./routes/triggerMeNot.ts";
 import githubRouter from "./routes/github.ts";
 import { seedDatabase } from "./db/seed.ts";
+import wsRouter from "./routes/ws.ts";
 
 await seedDatabase();
-import wsRouter from "./routes/ws.ts";
 
 const app = new Hono();
 const apiRouter = new Hono();
