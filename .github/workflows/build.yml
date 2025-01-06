@@ -1,0 +1,32 @@
+name: Docker Compose Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Check if Docker compose for production is still valid
+        env:
+          SALT_ROUNDS: 10
+          JWT_SECRET: only-for-build-test
+          GITHUB_ID: ${{ secrets.GITHUB_ID }}
+          GITHUB_SECRET: ${{ secrets.GITHUB_SECRET }}
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        run: docker compose -f docker-compose.prod.yml build
