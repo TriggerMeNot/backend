@@ -3,8 +3,6 @@ import { describeRoute } from "@hono-openapi";
 import { resolver, validator } from "@hono-openapi/zod";
 import AuthSchema from "../interfaces/auth.ts";
 import authController from "../controllers/auth.ts";
-import GithubSchema from "../interfaces/github.ts";
-import GithubController from "../controllers/github.ts";
 
 const authRouter = new Hono();
 
@@ -54,21 +52,6 @@ authRouter.post(
   }),
   validator("form", AuthSchema.Register.Body),
   authController.register,
-);
-
-authRouter.post(
-  "/github",
-  describeRoute({
-    tags: ["auth", "github"],
-    description: "Login to get Github access",
-    responses: {
-      200: {
-        description: "Successful response",
-      },
-    },
-  }),
-  validator("json", GithubSchema.Root.Body),
-  GithubController.root,
 );
 
 export default authRouter;
