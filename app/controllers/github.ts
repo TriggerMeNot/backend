@@ -1,7 +1,8 @@
 import { Context } from "@hono";
 import { db } from "../db/config.ts";
-import { and, eq } from "drizzle-orm/expressions";
+import { eq } from "drizzle-orm/expressions";
 import { oauths as oauthSchema } from "../schemas/oauths.ts";
+import { oidcs as oidcSchema } from "../schemas/oidcs.ts";
 import { services as serviceSchema } from "../schemas/services.ts";
 import { users as userSchema } from "../schemas/users.ts";
 import { sign } from "@hono/jwt";
@@ -13,20 +14,20 @@ if (
   throw new Error("Environment variables for GitHub OAuth or JWT not set");
 }
 
-const SERVICE_NAME = "GitHub";
-
-async function root(ctx: Context) {
+async function linkGithub(code: string) {
   // Check if the service exists
   const services = await db.select().from(serviceSchema).where(
-    eq(serviceSchema.name, SERVICE_NAME),
+    eq(serviceSchema.name, "GitHub"),
   ).limit(1);
 
   if (!services.length) {
-    return ctx.json({ error: "Service not found" }, 404);
+    throw {
+      status: 404,
+      body: { error: "Service not found" },
+    };
   }
 
   const serviceId = services[0].id;
-  const { code } = ctx.req.valid("json" as never);
 
   const response = await fetch(
     `https://github.com/login/oauth/access_token`,
@@ -47,7 +48,10 @@ async function root(ctx: Context) {
   const data = await response.json();
 
   if ("error" in data) {
-    return ctx.json(data, 400);
+    throw {
+      status: 400,
+      body: data,
+    };
   }
 
   const {
@@ -62,18 +66,20 @@ async function root(ctx: Context) {
   });
   const userData = await userEmailsResponse.json();
   if ("error" in userData) {
-    console.error(userData);
-    return ctx.json(userData, 400);
+    throw {
+      status: 400,
+      body: userData,
+    };
   }
 
   // deno-lint-ignore no-explicit-any
   const email = userData.find((email: any) => email.primary)?.email;
 
   if (!email) {
-    return ctx.json(
-      { error: "No suitable email found in GitHub account" },
-      400,
-    );
+    throw {
+      status: 400,
+      body: { error: "No suitable email found in GitHub account" },
+    };
   }
 
   const githubUsernameResponse = await fetch(`https://api.github.com/user`, {
@@ -81,8 +87,10 @@ async function root(ctx: Context) {
   });
   const githubUserData = await githubUsernameResponse.json();
   if ("error" in githubUserData) {
-    console.error(githubUserData);
-    return ctx.json(githubUserData, 400);
+    throw {
+      status: 400,
+      body: githubUserData,
+    };
   }
 
   const githubUsername = githubUserData.login;
@@ -103,12 +111,84 @@ async function root(ctx: Context) {
     }).returning();
 
     if (!newUser.length) {
-      return ctx.json({ message: "Failed to create user" }, 500);
+      throw {
+        status: 500,
+        body: { message: "Failed to create user" },
+      };
     }
     userId = newUser[0].id;
   } else {
     userId = users[0].id;
   }
+
+  return {
+    userId,
+    serviceId,
+    email,
+    token,
+    tokenExpiresIn,
+    refreshToken,
+    refreshTokenExpiresIn,
+    actualTime,
+  };
+}
+
+async function authenticate(ctx: Context) {
+  const { code } = ctx.req.valid("json" as never);
+
+  const {
+    userId,
+    serviceId,
+    email,
+    token,
+    tokenExpiresIn,
+    refreshToken,
+    refreshTokenExpiresIn,
+    actualTime,
+  } = await linkGithub(code);
+
+  await db.insert(oidcSchema).values({
+    loginId: email,
+    userId,
+    serviceId,
+    token,
+    tokenExpiresAt: actualTime + tokenExpiresIn,
+    refreshToken,
+    refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
+  }).onConflictDoUpdate({
+    target: oidcSchema.id,
+    set: {
+      loginId: email,
+      token,
+      tokenExpiresAt: actualTime + tokenExpiresIn,
+      refreshToken,
+      refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
+    },
+  });
+
+  const payload = {
+    sub: userId,
+    role: "user",
+    exp: actualTime + 60 * 60 * 24, // Token expires in 24 hours
+  };
+
+  const jwtToken = await sign(payload, Deno.env.get("JWT_SECRET")!);
+
+  return ctx.json({ message: "Login/Register successful", token: jwtToken });
+}
+
+async function authorize(ctx: Context) {
+  const { code } = ctx.req.valid("json" as never);
+
+  const {
+    userId,
+    serviceId,
+    token,
+    tokenExpiresIn,
+    refreshToken,
+    refreshTokenExpiresIn,
+    actualTime,
+  } = await linkGithub(code);
 
   await db.insert(oauthSchema).values({
     userId,
@@ -125,21 +205,9 @@ async function root(ctx: Context) {
       refreshToken,
       refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
     },
-    setWhere: and(
-      eq(oauthSchema.userId, userId),
-      eq(oauthSchema.serviceId, serviceId),
-    ),
   });
 
-  const payload = {
-    sub: userId,
-    role: "user",
-    exp: actualTime + 60 * 60 * 24, // Token expires in 24 hours
-  };
-
-  const jwtToken = await sign(payload, Deno.env.get("JWT_SECRET")!);
-
-  return ctx.json({ message: "Login/Register successful", token: jwtToken });
+  return ctx.json({ message: "Connection successful" });
 }
 
-export default { root };
+export default { authenticate, authorize };

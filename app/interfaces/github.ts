@@ -2,7 +2,13 @@ import z from "zod";
 import "zod-openapi/extend";
 
 export default {
-  Root: {
+  Authenticate: {
+    Body: z.object({
+      code: z.string(),
+    }),
+  },
+
+  Authorize: {
     Body: z.object({
       code: z.string(),
     }),
