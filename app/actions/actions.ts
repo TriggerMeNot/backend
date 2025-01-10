@@ -15,8 +15,6 @@ async function init(
     case "On Fetch":
       await triggerMeNot.OnFetch(ctx, actionPlayground, playgroundId);
       break;
-    default:
-      return ctx.json({ error: "Action not found" }, 404);
   }
 
   const actionPlaygrounds = await db.select().from(actionPlaygroundSchema)

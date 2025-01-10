@@ -1,6 +1,7 @@
 import { db } from "../db/config.ts";
-import { eq } from "drizzle-orm/expressions";
+import { and, eq } from "drizzle-orm/expressions";
 import { playgrounds as playgroundsSchema } from "../schemas/playgrounds.ts";
+import { actionsPlayground as actionsPlaygroundSchema } from "../schemas/actionsPlayground.ts";
 import { reactions as reactionsSchema } from "../schemas/reactions.ts";
 import { reactionsPlayground as reactionsPlaygroundSchema } from "../schemas/reactionsPlayground.ts";
 import { reactionLinks as reactionLinkSchema } from "../schemas/reactionLinks.ts";
@@ -39,6 +40,33 @@ async function trigger(
     settings: reactionPlayground.settings,
     param: param,
   });
+}
+
+async function actionsTriggers(
+  actionId: number,
+  userId: number,
+  param: unknown,
+) {
+  const playgrounds = await db.select().from(playgroundsSchema)
+    .where(
+      eq(playgroundsSchema.userId, userId),
+    );
+
+  for (const playground of playgrounds) {
+    const actionPlaygrounds = await db.select().from(
+      actionsPlaygroundSchema,
+    )
+      .where(
+        and(
+          eq(actionsPlaygroundSchema.actionId, actionId),
+          eq(actionsPlaygroundSchema.playgroundId, playground.id),
+        ),
+      );
+
+    for (const actionPlayground of actionPlaygrounds) {
+      actionTrigger(actionPlayground.id, param);
+    }
+  }
 }
 
 async function actionTrigger(triggerId: number, param: unknown) {
@@ -85,4 +113,4 @@ async function reactionTrigger(triggerId: number, param: unknown) {
   }
 }
 
-export { actionTrigger, reactionTrigger };
+export { actionsTriggers, actionTrigger, reactionTrigger };

@@ -37,7 +37,11 @@ const SERVICES: Record<string, Service> = {
     },
   },
   "GitHub": {
-    actions: {},
+    actions: {
+      "On Pull Request Opened": {
+        description: "When a pull request is opened",
+      },
+    },
     reactions: {
       "Create Issue": {
         description: "Create an issue in a repository",
