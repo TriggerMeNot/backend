@@ -1,6 +1,6 @@
 import { Context } from "@hono";
 import { db } from "../db/config.ts";
-import { eq } from "drizzle-orm/expressions";
+import { and, eq } from "drizzle-orm/expressions";
 import { SERVICES } from "../db/seed.ts";
 import { oauths as oauthSchema } from "../schemas/oauths.ts";
 import { oidcs as oidcSchema } from "../schemas/oidcs.ts";
@@ -140,6 +140,23 @@ async function authenticate(ctx: Context) {
   return ctx.json({ message: "Login/Register successful", token: jwtToken });
 }
 
+async function isAuthorized(ctx: Context) {
+  const userId = ctx.get("jwtPayload").sub;
+
+  const users = await db
+    .select()
+    .from(oidcSchema)
+    .where(
+      and(
+        eq(oidcSchema.userId, userId),
+        eq(oidcSchema.serviceId, SERVICES.GitHub.id!),
+      ),
+    )
+    .limit(1);
+
+  return ctx.json({ authorized: users.length ? true : false });
+}
+
 async function authorize(ctx: Context) {
   const userId = ctx.get("jwtPayload").sub;
   const { code } = ctx.req.valid("json" as never);
@@ -199,4 +216,4 @@ async function webhook(ctx: Context) {
   return ctx.json({ message: "Webhook received" });
 }
 
-export default { authenticate, authorize, webhook };
+export default { authenticate, authorize, webhook, isAuthorized };

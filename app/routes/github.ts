@@ -38,6 +38,20 @@ githubRouter.post(
 
 githubRouter.use(jwtMiddleware);
 
+githubRouter.get(
+  "/authorize",
+  describeRoute({
+    tags: ["auth", "github"],
+    description: "Authorize with Github",
+    responses: {
+      200: {
+        description: "Successful response",
+      },
+    },
+  }),
+  GithubController.isAuthorized,
+);
+
 githubRouter.post(
   "/authorize",
   describeRoute({
