@@ -12,7 +12,7 @@ export const oidcs = pgTable("oidcs", {
     () => services.id,
     { onDelete: "cascade" },
   ),
-  loginId: text("login_id").notNull(),
+  serviceUserId: text("service_user_id").notNull(),
   token: text("token").notNull(),
   tokenExpiresAt: integer("token_expires_at").notNull(),
   refreshToken: text("refresh_token").notNull(),

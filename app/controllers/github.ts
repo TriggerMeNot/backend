@@ -15,120 +15,78 @@ if (
 }
 
 async function linkGithub(code: string) {
-  // Check if the service exists
+  // Get the service ID
   const services = await db.select().from(serviceSchema).where(
     eq(serviceSchema.name, "GitHub"),
   ).limit(1);
-
-  if (!services.length) {
-    throw {
-      status: 404,
-      body: { error: "Service not found" },
-    };
-  }
-
   const serviceId = services[0].id;
 
-  const response = await fetch(
-    `https://github.com/login/oauth/access_token`,
-    {
-      method: "POST",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        client_id: Deno.env.get("GITHUB_ID")!,
-        client_secret: Deno.env.get("GITHUB_SECRET")!,
-        code,
-      }),
-    },
-  );
-
-  const data = await response.json();
-  if ("error" in data) {
-    throw {
-      status: 400,
-      body: data,
-    };
-  }
-
+  // Get the access token and refresh token
   const {
     access_token: token,
     expires_in: tokenExpiresIn,
     refresh_token: refreshToken,
     refresh_token_expires_in: refreshTokenExpiresIn,
-  } = data;
-
-  const userEmailsResponse = await fetch(`https://api.github.com/user/emails`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const userData = await userEmailsResponse.json();
-  if ("error" in userData) {
-    throw {
-      status: 400,
-      body: userData,
-    };
-  }
-
-  // deno-lint-ignore no-explicit-any
-  const email = userData.find((email: any) => email.primary)?.email;
-
-  if (!email) {
-    throw {
-      status: 400,
-      body: { error: "No suitable email found in GitHub account" },
-    };
-  }
-
-  const githubUsernameResponse = await fetch(`https://api.github.com/user`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const githubUserData = await githubUsernameResponse.json();
-  if ("error" in githubUserData) {
-    throw {
-      status: 400,
-      body: githubUserData,
-    };
-  }
-
-  const githubUsername = githubUserData.login;
-
-  const actualTime = Math.floor(Date.now() / 1000);
-
-  // Check if the user already exists
-  const users = await db.select().from(userSchema).where(
-    eq(userSchema.email, email),
-  ).limit(1);
-
-  let userId;
-  if (!users.length) {
-    const newUser = await db.insert(userSchema).values({
-      email,
-      username: githubUsername,
-      password: null, // OAuth users may not have a password
-    }).returning();
-
-    if (!newUser.length) {
+  } = await fetch("https://github.com/login/oauth/access_token", {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      client_id: Deno.env.get("GITHUB_ID")!,
+      client_secret: Deno.env.get("GITHUB_SECRET")!,
+      code,
+    }),
+  })
+    .then((res) => res.json())
+    .catch((err) => {
       throw {
-        status: 500,
-        body: { message: "Failed to create user" },
+        status: 400,
+        body: err,
       };
-    }
-    userId = newUser[0].id;
-  } else {
-    userId = users[0].id;
-  }
+    });
+
+  // Get information about the user
+  const {
+    login: username,
+    id: githubUserId,
+  } = await fetch(`https://api.github.com/user`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+    .then((res) => res.json())
+    .catch((err) => {
+      throw {
+        status: 400,
+        body: err,
+      };
+    });
+
+  // Get the primary email of the user
+  const email = await fetch(`https://api.github.com/user/emails`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      return data.find((e: { primary: boolean }) => e.primary)?.email;
+    })
+    .catch((err) => {
+      throw {
+        status: 400,
+        body: err,
+      };
+    });
 
   return {
-    userId,
     serviceId,
+    githubUserId,
+    username,
     email,
     token,
     tokenExpiresIn,
     refreshToken,
     refreshTokenExpiresIn,
-    actualTime,
+    actualTime: Math.floor(Date.now() / 1000),
   };
 }
 
@@ -136,8 +94,9 @@ async function authenticate(ctx: Context) {
   const { code } = ctx.req.valid("json" as never);
 
   const {
-    userId,
     serviceId,
+    githubUserId,
+    username,
     email,
     token,
     tokenExpiresIn,
@@ -146,8 +105,21 @@ async function authenticate(ctx: Context) {
     actualTime,
   } = await linkGithub(code);
 
+  // Get the user ID / create a new user if not found
+  const users = await db.select().from(userSchema).where(
+    eq(userSchema.email, email),
+  ).limit(1);
+  const userId = users.length
+    ? users[0].id
+    : await db.insert(userSchema).values({
+      email,
+      username,
+      password: null,
+    }).returning()
+      .then((newUser) => newUser[0].id);
+
   await db.insert(oidcSchema).values({
-    loginId: email,
+    serviceUserId: githubUserId,
     userId,
     serviceId,
     token,
@@ -157,7 +129,6 @@ async function authenticate(ctx: Context) {
   }).onConflictDoUpdate({
     target: [oidcSchema.userId, oidcSchema.serviceId],
     set: {
-      loginId: email,
       token,
       tokenExpiresAt: actualTime + tokenExpiresIn,
       refreshToken,
@@ -177,28 +148,42 @@ async function authenticate(ctx: Context) {
 }
 
 async function authorize(ctx: Context) {
+  const userId = ctx.get("jwtPayload").sub;
   const { code } = ctx.req.valid("json" as never);
 
-  return ctx.json({ success: true, code });
+  const {
+    serviceId,
+    githubUserId,
+    token,
+    tokenExpiresIn,
+    refreshToken,
+    refreshTokenExpiresIn,
+    actualTime,
+  } = await linkGithub(code);
 
-  // await db.insert(oauthSchema).values({
-  //   userId,
-  //   serviceId,
-  //   token,
-  //   tokenExpiresAt: actualTime + tokenExpiresIn,
-  //   refreshToken,
-  //   refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
-  // }).onConflictDoUpdate({
-  //   target: [oidcSchema.userId, oidcSchema.serviceId],
-  //   set: {
-  //     token,
-  //     tokenExpiresAt: actualTime + tokenExpiresIn,
-  //     refreshToken,
-  //     refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
-  //   },
-  // });
+  await db.insert(oauthSchema).values({
+    userId,
+    serviceId,
+    serviceUserId: githubUserId,
+    token,
+    tokenExpiresAt: actualTime + tokenExpiresIn,
+    refreshToken,
+    refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
+  }).onConflictDoUpdate({
+    target: [oidcSchema.userId, oidcSchema.serviceId],
+    set: {
+      token,
+      tokenExpiresAt: actualTime + tokenExpiresIn,
+      refreshToken,
+      refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
+    },
+  });
 
-  // return ctx.json({ message: "Connection successful" });
+  return ctx.json({ message: "Connection successful" });
 }
 
-export default { authenticate, authorize };
+function webhook(ctx: Context) {
+  return ctx.json({ message: "Webhook received" });
+}
+
+export default { authenticate, authorize, webhook };

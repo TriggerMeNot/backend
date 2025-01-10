@@ -8,6 +8,20 @@ import GithubController from "../controllers/github.ts";
 const githubRouter = new Hono();
 
 githubRouter.post(
+  "/webhook",
+  describeRoute({
+    tags: ["auth", "github"],
+    description: "Webhook for Github",
+    responses: {
+      200: {
+        description: "Successful response",
+      },
+    },
+  }),
+  GithubController.webhook,
+);
+
+githubRouter.post(
   "/authenticate",
   describeRoute({
     tags: ["auth", "github"],
