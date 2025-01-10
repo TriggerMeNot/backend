@@ -20,26 +20,21 @@ async function createIssue(reaction: ReactionTrigger) {
   }
   const oauth = oauths[0];
 
-  const fetchOptions: RequestInit = {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `token ${oauth.token}`,
+  return await fetch(
+    `https://api.github.com/repos/${settings.owner}/${settings.repo}/issues`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `token ${oauth.token}`,
+      },
+      body: JSON.stringify({
+        title: settings.title,
+        body: settings.body,
+      }),
     },
-    body: JSON.stringify({
-      title: settings.title,
-      body: settings.body,
-    }),
-  };
-
-  const url =
-    `https://api.github.com/repos/${settings.owner}/${settings.repo}/issues`;
-  const response = await fetch(url, fetchOptions);
-
-  const json = await response.json();
-  return json;
+  )
+    .then((res) => res.json());
 }
 
-export default {
-  createIssue,
-};
+export default { createIssue };
