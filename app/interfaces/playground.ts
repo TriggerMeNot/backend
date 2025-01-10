@@ -41,6 +41,7 @@ export default {
 
   PatchAction: {
     Body: z.object({
+      settings: z.record(z.any()).optional(),
       x: z.number().optional(),
       y: z.number().optional(),
     }),
@@ -62,7 +63,7 @@ export default {
 
   PatchReaction: {
     Body: z.object({
-      settings: z.record(z.any()),
+      settings: z.record(z.any()).optional(),
       x: z.number().optional(),
       y: z.number().optional(),
     }),

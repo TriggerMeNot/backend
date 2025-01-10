@@ -181,7 +181,7 @@ async function patchAction(ctx: Context) {
     playgroundId: playgroundIdString,
     actionPlaygroundId: actionPlaygroundIdString,
   } = ctx.req.param();
-  const { x, y } = ctx.req.valid("json" as never);
+  const values = ctx.req.valid("json" as never);
 
   if (isNaN(parseInt(playgroundIdString))) {
     return ctx.json({ error: "Invalid playground ID" }, 400);
@@ -193,15 +193,13 @@ async function patchAction(ctx: Context) {
   const playgroundId = parseInt(playgroundIdString);
   const actionId = parseInt(actionPlaygroundIdString);
 
-  const actions = await db.update(actionPlaygroundSchema).set({
-    x,
-    y,
-  }).where(
-    and(
-      eq(actionPlaygroundSchema.id, actionId),
-      eq(actionPlaygroundSchema.playgroundId, playgroundId),
-    ),
-  ).returning();
+  const actions = await db.update(actionPlaygroundSchema)
+    .set(values).where(
+      and(
+        eq(actionPlaygroundSchema.id, actionId),
+        eq(actionPlaygroundSchema.playgroundId, playgroundId),
+      ),
+    ).returning();
 
   if (!actions.length) {
     return ctx.json({ error: "Action not found" }, 404);
@@ -307,7 +305,7 @@ async function patchReaction(ctx: Context) {
     playgroundId: playgroundIdString,
     reactionPlaygroundId: reactionPlaygroundIdString,
   } = ctx.req.param();
-  const { settings, x, y } = ctx.req.valid("json" as never);
+  const values = ctx.req.valid("json" as never);
 
   if (isNaN(parseInt(playgroundIdString))) {
     return ctx.json({ error: "Invalid playground ID" }, 400);
@@ -319,16 +317,13 @@ async function patchReaction(ctx: Context) {
   const playgroundId = parseInt(playgroundIdString);
   const reactionId = parseInt(reactionPlaygroundIdString);
 
-  const reactions = await db.update(reactionPlaygroundSchema).set({
-    settings,
-    x,
-    y,
-  }).where(
-    and(
-      eq(reactionPlaygroundSchema.id, reactionId),
-      eq(reactionPlaygroundSchema.playgroundId, playgroundId),
-    ),
-  ).returning();
+  const reactions = await db.update(reactionPlaygroundSchema)
+    .set(values).where(
+      and(
+        eq(reactionPlaygroundSchema.id, reactionId),
+        eq(reactionPlaygroundSchema.playgroundId, playgroundId),
+      ),
+    ).returning();
 
   if (!reactions.length) {
     return ctx.json({ error: "Reaction not found" }, 404);
