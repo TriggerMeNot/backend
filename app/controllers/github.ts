@@ -1,11 +1,12 @@
 import { Context } from "@hono";
 import { db } from "../db/config.ts";
 import { eq } from "drizzle-orm/expressions";
+import { SERVICES } from "../db/seed.ts";
 import { oauths as oauthSchema } from "../schemas/oauths.ts";
 import { oidcs as oidcSchema } from "../schemas/oidcs.ts";
-import { services as serviceSchema } from "../schemas/services.ts";
 import { users as userSchema } from "../schemas/users.ts";
 import { sign } from "@hono/jwt";
+import { actionsTriggers } from "../utils/trigger.ts";
 
 if (
   !Deno.env.get("GITHUB_ID") || !Deno.env.get("GITHUB_SECRET") ||
@@ -15,12 +16,6 @@ if (
 }
 
 async function linkGithub(code: string) {
-  // Get the service ID
-  const services = await db.select().from(serviceSchema).where(
-    eq(serviceSchema.name, "GitHub"),
-  ).limit(1);
-  const serviceId = services[0].id;
-
   // Get the access token and refresh token
   const {
     access_token: token,
@@ -78,7 +73,6 @@ async function linkGithub(code: string) {
     });
 
   return {
-    serviceId,
     githubUserId,
     username,
     email,
@@ -94,7 +88,6 @@ async function authenticate(ctx: Context) {
   const { code } = ctx.req.valid("json" as never);
 
   const {
-    serviceId,
     githubUserId,
     username,
     email,
@@ -121,7 +114,7 @@ async function authenticate(ctx: Context) {
   await db.insert(oidcSchema).values({
     serviceUserId: githubUserId,
     userId,
-    serviceId,
+    serviceId: SERVICES.GitHub.id!,
     token,
     tokenExpiresAt: actualTime + tokenExpiresIn,
     refreshToken,
@@ -152,7 +145,6 @@ async function authorize(ctx: Context) {
   const { code } = ctx.req.valid("json" as never);
 
   const {
-    serviceId,
     githubUserId,
     token,
     tokenExpiresIn,
@@ -163,7 +155,7 @@ async function authorize(ctx: Context) {
 
   await db.insert(oauthSchema).values({
     userId,
-    serviceId,
+    serviceId: SERVICES.GitHub.id!,
     serviceUserId: githubUserId,
     token,
     tokenExpiresAt: actualTime + tokenExpiresIn,
@@ -182,7 +174,28 @@ async function authorize(ctx: Context) {
   return ctx.json({ message: "Connection successful" });
 }
 
-function webhook(ctx: Context) {
+async function webhook(ctx: Context) {
+  const data = await ctx.req.json();
+
+  if (
+    data.pull_request &&
+    (data.action === "opened" || data.action === "reopened")
+  ) {
+    const users = await db
+      .select()
+      .from(oidcSchema)
+      .where(eq(oidcSchema.serviceUserId, data.pull_request.user.id))
+      .limit(1);
+
+    if (users.length) {
+      actionsTriggers(
+        SERVICES.GitHub.actions!["On Pull Request Opened"].id!,
+        users[0].userId,
+        {},
+      );
+    }
+  }
+
   return ctx.json({ message: "Webhook received" });
 }
 
