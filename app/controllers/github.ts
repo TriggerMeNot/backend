@@ -46,7 +46,6 @@ async function linkGithub(code: string) {
   );
 
   const data = await response.json();
-
   if ("error" in data) {
     throw {
       status: 400,
@@ -156,7 +155,7 @@ async function authenticate(ctx: Context) {
     refreshToken,
     refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
   }).onConflictDoUpdate({
-    target: oidcSchema.id,
+    target: [oidcSchema.userId, oidcSchema.serviceId],
     set: {
       loginId: email,
       token,
@@ -180,34 +179,26 @@ async function authenticate(ctx: Context) {
 async function authorize(ctx: Context) {
   const { code } = ctx.req.valid("json" as never);
 
-  const {
-    userId,
-    serviceId,
-    token,
-    tokenExpiresIn,
-    refreshToken,
-    refreshTokenExpiresIn,
-    actualTime,
-  } = await linkGithub(code);
+  return ctx.json({ success: true, code });
 
-  await db.insert(oauthSchema).values({
-    userId,
-    serviceId,
-    token,
-    tokenExpiresAt: actualTime + tokenExpiresIn,
-    refreshToken,
-    refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
-  }).onConflictDoUpdate({
-    target: oauthSchema.id,
-    set: {
-      token,
-      tokenExpiresAt: actualTime + tokenExpiresIn,
-      refreshToken,
-      refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
-    },
-  });
+  // await db.insert(oauthSchema).values({
+  //   userId,
+  //   serviceId,
+  //   token,
+  //   tokenExpiresAt: actualTime + tokenExpiresIn,
+  //   refreshToken,
+  //   refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
+  // }).onConflictDoUpdate({
+  //   target: [oidcSchema.userId, oidcSchema.serviceId],
+  //   set: {
+  //     token,
+  //     tokenExpiresAt: actualTime + tokenExpiresIn,
+  //     refreshToken,
+  //     refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
+  //   },
+  // });
 
-  return ctx.json({ message: "Connection successful" });
+  // return ctx.json({ message: "Connection successful" });
 }
 
 export default { authenticate, authorize };

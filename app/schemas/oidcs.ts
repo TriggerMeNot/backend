@@ -1,4 +1,4 @@
-import { integer, pgTable, serial, text } from "drizzle-orm/pg-core";
+import { integer, pgTable, serial, text, unique } from "drizzle-orm/pg-core";
 import { users } from "./users.ts";
 import { services } from "./services.ts";
 
@@ -17,4 +17,8 @@ export const oidcs = pgTable("oidcs", {
   tokenExpiresAt: integer("token_expires_at").notNull(),
   refreshToken: text("refresh_token").notNull(),
   refreshTokenExpiresAt: integer("refresh_token_expires_at").notNull(),
+}, (table) => {
+  return {
+    unq: unique().on(table.userId, table.serviceId),
+  };
 });
