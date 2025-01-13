@@ -34,6 +34,7 @@ export default {
 
   AddAction: {
     Body: z.object({
+      settings: z.record(z.any()).optional(),
       x: z.number(),
       y: z.number(),
     }),
@@ -55,7 +56,7 @@ export default {
 
   AddReaction: {
     Body: z.object({
-      settings: z.record(z.any()),
+      settings: z.record(z.any()).optional(),
       x: z.number(),
       y: z.number(),
     }),

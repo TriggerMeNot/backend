@@ -3,12 +3,16 @@ import { db } from "../db/config.ts";
 import { and, eq } from "drizzle-orm/expressions";
 import { playgrounds as playgroundSchema } from "../schemas/playgrounds.ts";
 import { actions as actionSchema } from "../schemas/actions.ts";
+import { reactions as reactionSchema } from "../schemas/reactions.ts";
 import { reactionsPlayground as reactionPlaygroundSchema } from "../schemas/reactionsPlayground.ts";
 import { actionsPlayground as actionPlaygroundSchema } from "../schemas/actionsPlayground.ts";
 import { reactionLinks as reactionLinkSchema } from "../schemas/reactionLinks.ts";
 import { actionLinks as actionLinkSchema } from "../schemas/actionLinks.ts";
 import actionController from "../actions/actions.ts";
 import { actionTrigger } from "../utils/trigger.ts";
+import { jsonSchemaToZod } from "json-schema-to-zod";
+import { z } from "zod";
+import "zod-openapi/extend";
 
 async function list(ctx: Context) {
   const userId = ctx.get("jwtPayload").sub;
@@ -144,6 +148,7 @@ async function addAction(ctx: Context) {
   const {
     playgroundId: playgroundIdString,
     actionId: actionIdString,
+    settings: settingsString,
   } = ctx.req.param();
   const { x, y } = ctx.req.valid("json" as never);
 
@@ -157,16 +162,35 @@ async function addAction(ctx: Context) {
   const playgroundId = parseInt(playgroundIdString);
   const actionId = parseInt(actionIdString);
 
+  const actions = await db.select().from(actionSchema).where(
+    eq(actionSchema.id, actionId),
+  ).limit(1);
+
+  if (!actions.length) {
+    return ctx.json({ error: "Action not found" }, 404);
+  }
+
+  if (actions[0].settings) {
+    if (!settingsString) {
+      return ctx.json({ error: "Missing settings" }, 400);
+    }
+
+    const schemaString = jsonSchemaToZod(actions[0].settings);
+    const settingsSchema = new Function("z", `return ${schemaString}`)(z);
+
+    try {
+      settingsSchema.parse(JSON.parse(settingsString));
+    } catch (e) {
+      return ctx.text((e as Error).message, 400);
+    }
+  }
+
   const actionsPlayground = await db.insert(actionPlaygroundSchema).values({
     playgroundId,
     actionId,
     x,
     y,
   }).returning();
-
-  const actions = await db.select().from(actionSchema).where(
-    eq(actionSchema.id, actionId),
-  ).limit(1);
 
   return await actionController.init(
     ctx,
@@ -289,7 +313,30 @@ async function addReaction(ctx: Context) {
   const playgroundId = parseInt(playgroundIdString);
   const reactionId = parseInt(reactionIdString);
 
-  const reactions = await db.insert(reactionPlaygroundSchema).values({
+  const reactions = await db.select().from(reactionSchema).where(
+    eq(reactionSchema.id, reactionId),
+  ).limit(1);
+
+  if (!reactions.length) {
+    return ctx.json({ error: "Reaction not found" }, 404);
+  }
+
+  if (reactions[0].settings) {
+    if (!settings) {
+      return ctx.json({ error: "Missing settings" }, 400);
+    }
+
+    const schemaString = jsonSchemaToZod(reactions[0].settings);
+    const settingsSchema = new Function("z", `return ${schemaString}`)(z);
+
+    try {
+      settingsSchema.parse(settings);
+    } catch (e) {
+      return ctx.text((e as Error).message, 400);
+    }
+  }
+
+  const reactionsPlayground = await db.insert(reactionPlaygroundSchema).values({
     playgroundId,
     reactionId,
     settings,
@@ -297,7 +344,7 @@ async function addReaction(ctx: Context) {
     y,
   }).returning();
 
-  return ctx.json(reactions[0], 201);
+  return ctx.json(reactionsPlayground[0], 201);
 }
 
 async function patchReaction(ctx: Context) {
