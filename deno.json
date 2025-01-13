@@ -24,6 +24,7 @@
     "@hono/oauth-providers": "npm:@hono/oauth-providers@^0.6.2",
     "@hono/prometheus": "npm:@hono/prometheus@^1.0.1",
     "@hono/swagger-ui": "npm:@hono/swagger-ui@^0.5.0",
+    "cron-schedule": "jsr:@p4sca1/cron-schedule@^5.0.3",
     "@scalar/hono-api-reference": "npm:@scalar/hono-api-reference@^0.5.165",
     "@std/assert": "jsr:@std/assert@^1.0.10",
     "@types/pg": "npm:@types/pg@^8.11.10",

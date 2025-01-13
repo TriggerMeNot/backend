@@ -13,6 +13,7 @@ import userRouter from "./routes/user.ts";
 import playgroundRouter from "./routes/playground.ts";
 import triggerMeNotRouter from "./routes/triggerMeNot.ts";
 import githubRouter from "./routes/github.ts";
+import googleRouter from "./routes/google.ts";
 import { seedDatabase } from "./db/seed.ts";
 
 await seedDatabase();
@@ -42,6 +43,7 @@ apiRouter.route("/user", userRouter);
 apiRouter.route("/playground", playgroundRouter);
 apiRouter.route("/trigger-me-not", triggerMeNotRouter);
 apiRouter.route("/github", githubRouter);
+apiRouter.route("/google", googleRouter);
 
 app.route("/api", apiRouter);
 
