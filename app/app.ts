@@ -15,6 +15,7 @@ import triggerMeNotRouter from "./routes/triggerMeNot.ts";
 import githubRouter from "./routes/github.ts";
 import googleRouter from "./routes/google.ts";
 import discordRouter from "./routes/discord.ts";
+import microsoftRouter from "./routes/microsoft.ts";
 import { seedDatabase } from "./db/seed.ts";
 
 await seedDatabase();
@@ -46,6 +47,7 @@ apiRouter.route("/trigger-me-not", triggerMeNotRouter);
 apiRouter.route("/github", githubRouter);
 apiRouter.route("/google", googleRouter);
 apiRouter.route("/discord", discordRouter);
+apiRouter.route("/microsoft", microsoftRouter);
 
 app.route("/api", apiRouter);
 

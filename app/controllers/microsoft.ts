@@ -8,36 +8,39 @@ import { users as userSchema } from "../schemas/users.ts";
 import { sign } from "@hono/jwt";
 
 if (
-  !Deno.env.has("DISCORD_ID") || !Deno.env.has("DISCORD_SECRET") ||
-  !Deno.env.has("DISCORD_REDIRECT_URI") || !Deno.env.has("JWT_SECRET")
+  !Deno.env.has("MICROSOFT_TENANT") || !Deno.env.has("MICROSOFT_ID") ||
+  !Deno.env.has("MICROSOFT_SECRET") || !Deno.env.has("MICROSOFT_SCOPE") ||
+  !Deno.env.has("MICROSOFT_REDIRECT_URI") || !Deno.env.has("JWT_SECRET")
 ) {
-  throw new Error("Environment variables for Discord OAuth or JWT not set");
+  throw new Error("Environment variables for Microsoft OAuth or JWT not set");
 }
 
-async function linkDiscord(code: string) {
+async function linkMicrosoft(code: string) {
   // Get the access token and refresh token
   const {
     access_token: token,
     expires_in: tokenExpiresIn,
     refresh_token: refreshToken,
-  } = await fetch("https://discord.com/api/oauth2/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
+  } = await fetch(
+    `https://login.microsoftonline.com/${
+      Deno.env.get("MICROSOFT_TENANT")
+    }/oauth2/v2.0/token`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        client_id: Deno.env.get("MICROSOFT_ID")!,
+        client_secret: Deno.env.get("MICROSOFT_SECRET")!,
+        code,
+        grant_type: "authorization_code",
+        redirect_uri: Deno.env.get("MICROSOFT_REDIRECT_URI")!,
+        scope: Deno.env.get("MICROSOFT_SCOPE")!,
+      }),
     },
-    body: new URLSearchParams({
-      client_id: Deno.env.get("DISCORD_ID")!,
-      client_secret: Deno.env.get("DISCORD_SECRET")!,
-      code,
-      grant_type: "authorization_code",
-      redirect_uri: Deno.env.get("DISCORD_REDIRECT_URI")!,
-    }),
-  })
+  )
     .then((res) => res.json())
-    .then((data) => {
-      console.log(data);
-      return data;
-    })
     .catch((err) => {
       throw {
         status: 400,
@@ -47,10 +50,10 @@ async function linkDiscord(code: string) {
 
   // Get information about the user
   const {
-    id: discordUserId,
-    global_name: username,
-    email,
-  } = await fetch(`https://discord.com/api/users/@me`, {
+    id: microsoftUserId,
+    displayName: username,
+    mail: email,
+  } = await fetch(`https://graph.microsoft.com/v1.0/me`, {
     headers: { Authorization: `Bearer ${token}` },
   })
     .then((res) => res.json())
@@ -62,7 +65,7 @@ async function linkDiscord(code: string) {
     });
 
   return {
-    discordUserId,
+    microsoftUserId,
     username,
     email,
     token,
@@ -72,7 +75,7 @@ async function linkDiscord(code: string) {
   };
 }
 
-async function discordRefreshToken(
+async function microsoftRefreshToken(
   userId: number,
   refreshToken: string,
 ) {
@@ -80,14 +83,14 @@ async function discordRefreshToken(
     access_token: token,
     expires_in: tokenExpiresIn,
     refresh_token: newRefreshToken,
-  } = await fetch("https://discord.com/api/oauth2/token", {
+  } = await fetch("https://microsoft.com/api/oauth2/token", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({
-      client_id: Deno.env.get("DISCORD_ID")!,
-      client_secret: Deno.env.get("DISCORD_SECRET")!,
+      client_id: Deno.env.get("MICROSOFT_ID")!,
+      client_secret: Deno.env.get("MICROSOFT_SECRET")!,
       grant_type: "refresh_token",
       refresh_token: refreshToken,
     }),
@@ -103,7 +106,7 @@ async function discordRefreshToken(
   }).where(
     and(
       eq(oauthSchema.userId, userId),
-      eq(oauthSchema.serviceId, SERVICES.Discord.id!),
+      eq(oauthSchema.serviceId, SERVICES.Microsoft.id!),
     ),
   );
 
@@ -114,14 +117,14 @@ async function authenticate(ctx: Context) {
   const { code } = ctx.req.valid("json" as never);
 
   const {
-    discordUserId,
+    microsoftUserId,
     username,
     email,
     token,
     tokenExpiresIn,
     refreshToken,
     actualTime,
-  } = await linkDiscord(code);
+  } = await linkMicrosoft(code);
 
   // Get the user ID / create a new user if not found
   const users = await db.select().from(userSchema).where(
@@ -137,20 +140,20 @@ async function authenticate(ctx: Context) {
       .then((newUser) => newUser[0].id);
 
   await db.insert(oidcSchema).values({
-    serviceUserId: discordUserId,
+    serviceUserId: microsoftUserId,
     userId,
-    serviceId: SERVICES.Discord.id!,
+    serviceId: SERVICES.Microsoft.id!,
     token,
     tokenExpiresAt: actualTime + tokenExpiresIn,
     refreshToken,
-    refreshTokenExpiresAt: actualTime + (365 * 24 * 60 * 60), // 1 year in seconds
+    refreshTokenExpiresAt: actualTime + (90 * 24 * 60 * 60), // 90 days in seconds
   }).onConflictDoUpdate({
     target: [oidcSchema.userId, oidcSchema.serviceId],
     set: {
       token,
       tokenExpiresAt: actualTime + tokenExpiresIn,
       refreshToken,
-      refreshTokenExpiresAt: actualTime + (365 * 24 * 60 * 60), // 1 year in seconds
+      refreshTokenExpiresAt: actualTime + (90 * 24 * 60 * 60), // 90 days in seconds
     },
   });
 
@@ -174,7 +177,7 @@ async function isAuthorized(ctx: Context) {
     .where(
       and(
         eq(oauthSchema.userId, userId),
-        eq(oauthSchema.serviceId, SERVICES.Discord.id!),
+        eq(oauthSchema.serviceId, SERVICES.Microsoft.id!),
       ),
     )
     .limit(1);
@@ -187,32 +190,32 @@ async function authorize(ctx: Context) {
   const { code } = ctx.req.valid("json" as never);
 
   const {
-    discordUserId,
+    microsoftUserId,
     token,
     tokenExpiresIn,
     refreshToken,
     actualTime,
-  } = await linkDiscord(code);
+  } = await linkMicrosoft(code);
 
   await db.insert(oauthSchema).values({
     userId,
-    serviceId: SERVICES.Discord.id!,
-    serviceUserId: discordUserId,
+    serviceId: SERVICES.Microsoft.id!,
+    serviceUserId: microsoftUserId,
     token,
     tokenExpiresAt: actualTime + tokenExpiresIn,
     refreshToken,
-    refreshTokenExpiresAt: actualTime + (365 * 24 * 60 * 60), // 1 year in seconds
+    refreshTokenExpiresAt: actualTime + (90 * 24 * 60 * 60), // 90 days in seconds
   }).onConflictDoUpdate({
-    target: [oidcSchema.userId, oidcSchema.serviceId],
+    target: [oauthSchema.userId, oauthSchema.serviceId],
     set: {
       token,
       tokenExpiresAt: actualTime + tokenExpiresIn,
       refreshToken,
-      refreshTokenExpiresAt: actualTime + (365 * 24 * 60 * 60), // 1 year in seconds
+      refreshTokenExpiresAt: actualTime + (90 * 24 * 60 * 60), // 90 days in seconds
     },
   });
 
   return ctx.json({ message: "Connection successful" });
 }
 
-export default { authenticate, authorize, isAuthorized, discordRefreshToken };
+export default { authenticate, authorize, isAuthorized, microsoftRefreshToken };
