@@ -8,8 +8,8 @@ import { users as userSchema } from "../schemas/users.ts";
 import { sign } from "@hono/jwt";
 
 if (
-  !Deno.env.get("GOOGLE_ID") || !Deno.env.get("GOOGLE_SECRET") ||
-  !Deno.env.get("JWT_SECRET")
+  !Deno.env.has("GOOGLE_ID") || !Deno.env.has("GOOGLE_SECRET") ||
+  !Deno.env.has("GOOGLE_REDIRECT_URI") || !Deno.env.has("JWT_SECRET")
 ) {
   throw new Error("Environment variables for Google OAuth or JWT not set");
 }
@@ -28,7 +28,7 @@ async function linkGoogle(code: string) {
       code: code,
       client_id: Deno.env.get("GOOGLE_ID")!,
       client_secret: Deno.env.get("GOOGLE_SECRET")!,
-      redirect_uri: "http://localhost:5173/login",
+      redirect_uri: Deno.env.get("GOOGLE_REDIRECT_URI")!,
       scope: "",
       grant_type: "authorization_code",
     }),
