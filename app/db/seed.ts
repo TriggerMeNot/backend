@@ -74,6 +74,7 @@ const SERVICES: Record<string, Service> = {
       },
     },
   },
+  "Microsoft": {},
 };
 
 async function seedDatabase() {

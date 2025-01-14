@@ -8,8 +8,8 @@ import { users as userSchema } from "../schemas/users.ts";
 import { sign } from "@hono/jwt";
 
 if (
-  !Deno.env.get("DISCORD_ID") || !Deno.env.get("DISCORD_SECRET") ||
-  !Deno.env.get("JWT_SECRET")
+  !Deno.env.has("DISCORD_ID") || !Deno.env.has("DISCORD_SECRET") ||
+  !Deno.env.has("DISCORD_REDIRECT_URI") || !Deno.env.has("JWT_SECRET")
 ) {
   throw new Error("Environment variables for Discord OAuth or JWT not set");
 }
@@ -30,7 +30,7 @@ async function linkDiscord(code: string) {
       client_secret: Deno.env.get("DISCORD_SECRET")!,
       code,
       grant_type: "authorization_code",
-      redirect_uri: "http://localhost:8080",
+      redirect_uri: Deno.env.get("DISCORD_REDIRECT_URI")!,
     }),
   })
     .then((res) => res.json())
