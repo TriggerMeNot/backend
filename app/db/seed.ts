@@ -8,6 +8,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { FetchSettings, OnFetchParams } from "../interfaces/triggerMeNot.ts";
 import { GithubIssueSettings } from "../interfaces/github.ts";
 import { OnNewEmailSettings, SendEmailSettings } from "../interfaces/google.ts";
+import { OnNewMessageSettings } from "../interfaces/discord.ts";
 
 interface Element {
   id?: number;
@@ -45,7 +46,7 @@ const SERVICES: Record<string, Service> = {
     },
     reactions: {
       "Create Issue": {
-        description: "Create an issue in a repository",
+        description: "Create a new issue in the specified repository",
         settings: zodToJsonSchema(GithubIssueSettings),
       },
     },
@@ -53,14 +54,23 @@ const SERVICES: Record<string, Service> = {
   "Google": {
     actions: {
       "On New Email": {
-        description: "When a new email arrives",
+        description:
+          "Check at each time of the interval if there is a unread email in the inbox",
         settings: zodToJsonSchema(OnNewEmailSettings),
       },
     },
     reactions: {
       "Send Email": {
-        description: "Send an email",
+        description: "Send an email using the Gmail API",
         settings: zodToJsonSchema(SendEmailSettings),
+      },
+    },
+  },
+  "Discord": {
+    actions: {
+      "On New Message": {
+        description: "When a message as been sent in the last 5 minutes",
+        settings: zodToJsonSchema(OnNewMessageSettings),
       },
     },
   },

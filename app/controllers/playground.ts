@@ -148,9 +148,8 @@ async function addAction(ctx: Context) {
   const {
     playgroundId: playgroundIdString,
     actionId: actionIdString,
-    settings: settingsString,
   } = ctx.req.param();
-  const { x, y } = ctx.req.valid("json" as never);
+  const { settings, x, y } = ctx.req.valid("json" as never);
 
   if (isNaN(parseInt(playgroundIdString))) {
     return ctx.json({ error: "Invalid playground ID" }, 400);
@@ -171,7 +170,7 @@ async function addAction(ctx: Context) {
   }
 
   if (actions[0].settings) {
-    if (!settingsString) {
+    if (!settings) {
       return ctx.json({ error: "Missing settings" }, 400);
     }
 
@@ -179,7 +178,7 @@ async function addAction(ctx: Context) {
     const settingsSchema = new Function("z", `return ${schemaString}`)(z);
 
     try {
-      settingsSchema.parse(JSON.parse(settingsString));
+      settingsSchema.parse(settings);
     } catch (e) {
       return ctx.text((e as Error).message, 400);
     }
@@ -188,6 +187,7 @@ async function addAction(ctx: Context) {
   const actionsPlayground = await db.insert(actionPlaygroundSchema).values({
     playgroundId,
     actionId,
+    settings,
     x,
     y,
   }).returning();

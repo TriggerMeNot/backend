@@ -6,6 +6,7 @@ import { actionsPlayground as actionPlaygroundSchema } from "../schemas/actionsP
 import { IntervalBasedCronScheduler } from "cron-schedule/schedulers/interval-based";
 import triggerMeNot from "./triggerMeNot.ts";
 import google from "./google.ts";
+import discord from "./discord.ts";
 
 async function init(
   ctx: Context,
@@ -19,6 +20,9 @@ async function init(
       break;
     case "On New Email":
       await google.OnNewEmail(ctx, actionPlayground, playgroundId);
+      break;
+    case "On New Message":
+      await discord.OnNewMessage(ctx, actionPlayground, playgroundId);
       break;
   }
 
@@ -50,6 +54,9 @@ for (
   switch (cron.actions.name) {
     case "On New Email":
       google.cronOnNewEmail(cron.crons);
+      break;
+    case "On New Message":
+      discord.cronOnNewMessage(cron.crons);
       break;
   }
 }

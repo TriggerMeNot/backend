@@ -4,22 +4,25 @@ import triggerMeNot from "./triggerMeNot.ts";
 import github from "./github.ts";
 import google from "./google.ts";
 
-function run(reaction: ReactionTrigger) {
-  switch (reaction.name) {
-    case "Fetch Request":
-      triggerMeNot.fetchRequest(reaction);
-      break;
-    case "Create Issue":
-      github.createIssue(reaction);
-      break;
-    case "Send Email":
-      google.sendEmail(reaction);
-      break;
-    default:
-      throw new Error("Reaction not found");
+async function run(reaction: ReactionTrigger) {
+  try {
+    switch (reaction.name) {
+      case "Fetch Request":
+        await triggerMeNot.fetchRequest(reaction);
+        break;
+      case "Create Issue":
+        await github.createIssue(reaction);
+        break;
+      case "Send Email":
+        await google.sendEmail(reaction);
+        break;
+      default:
+        throw new Error("Reaction not found");
+    }
+    await reactionTrigger(reaction.id, reaction.param);
+  } catch (error) {
+    console.error(error);
   }
-
-  reactionTrigger(reaction.id, reaction.param);
 }
 
 export default { run };
