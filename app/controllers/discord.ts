@@ -9,12 +9,12 @@ import { sign } from "@hono/jwt";
 
 if (
   !Deno.env.has("DISCORD_ID") || !Deno.env.has("DISCORD_SECRET") ||
-  !Deno.env.has("DISCORD_REDIRECT_URI") || !Deno.env.has("JWT_SECRET")
+  !Deno.env.has("JWT_SECRET")
 ) {
   throw new Error("Environment variables for Discord OAuth or JWT not set");
 }
 
-async function linkDiscord(code: string) {
+async function linkDiscord(code: string, redirect_uri_path: string) {
   // Get the access token and refresh token
   const {
     access_token: token,
@@ -30,7 +30,7 @@ async function linkDiscord(code: string) {
       client_secret: Deno.env.get("DISCORD_SECRET")!,
       code,
       grant_type: "authorization_code",
-      redirect_uri: Deno.env.get("DISCORD_REDIRECT_URI")!,
+      redirect_uri: Deno.env.get("REDIRECT_URI")! + redirect_uri_path,
     }),
   })
     .then((res) => res.json())
@@ -121,7 +121,7 @@ async function authenticate(ctx: Context) {
     tokenExpiresIn,
     refreshToken,
     actualTime,
-  } = await linkDiscord(code);
+  } = await linkDiscord(code, "/login/discord");
 
   // Get the user ID / create a new user if not found
   const users = await db.select().from(userSchema).where(
@@ -192,7 +192,7 @@ async function authorize(ctx: Context) {
     tokenExpiresIn,
     refreshToken,
     actualTime,
-  } = await linkDiscord(code);
+  } = await linkDiscord(code, "/services/discord");
 
   await db.insert(oauthSchema).values({
     userId,
