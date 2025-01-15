@@ -10,12 +10,12 @@ import { sign } from "@hono/jwt";
 if (
   !Deno.env.has("MICROSOFT_TENANT") || !Deno.env.has("MICROSOFT_ID") ||
   !Deno.env.has("MICROSOFT_SECRET") || !Deno.env.has("MICROSOFT_SCOPE") ||
-  !Deno.env.has("MICROSOFT_REDIRECT_URI") || !Deno.env.has("JWT_SECRET")
+  !Deno.env.has("JWT_SECRET")
 ) {
   throw new Error("Environment variables for Microsoft OAuth or JWT not set");
 }
 
-async function linkMicrosoft(code: string) {
+async function linkMicrosoft(code: string, redirect_uri_path: string) {
   // Get the access token and refresh token
   const {
     access_token: token,
@@ -35,7 +35,7 @@ async function linkMicrosoft(code: string) {
         client_secret: Deno.env.get("MICROSOFT_SECRET")!,
         code,
         grant_type: "authorization_code",
-        redirect_uri: Deno.env.get("MICROSOFT_REDIRECT_URI")!,
+        redirect_uri: Deno.env.get("REDIRECT_URI")! + redirect_uri_path,
         scope: Deno.env.get("MICROSOFT_SCOPE")!,
       }),
     },
@@ -124,7 +124,7 @@ async function authenticate(ctx: Context) {
     tokenExpiresIn,
     refreshToken,
     actualTime,
-  } = await linkMicrosoft(code);
+  } = await linkMicrosoft(code, "/login/microsoft");
 
   // Get the user ID / create a new user if not found
   const users = await db.select().from(userSchema).where(
@@ -195,7 +195,7 @@ async function authorize(ctx: Context) {
     tokenExpiresIn,
     refreshToken,
     actualTime,
-  } = await linkMicrosoft(code);
+  } = await linkMicrosoft(code, "/services/microsoft");
 
   await db.insert(oauthSchema).values({
     userId,

@@ -9,12 +9,12 @@ import { sign } from "@hono/jwt";
 
 if (
   !Deno.env.has("GOOGLE_ID") || !Deno.env.has("GOOGLE_SECRET") ||
-  !Deno.env.has("GOOGLE_REDIRECT_URI") || !Deno.env.has("JWT_SECRET")
+  !Deno.env.has("JWT_SECRET")
 ) {
   throw new Error("Environment variables for Google OAuth or JWT not set");
 }
 
-async function linkGoogle(code: string) {
+async function linkGoogle(code: string, redirect_uri_path: string) {
   const {
     access_token: token,
     refresh_token: refreshToken,
@@ -28,7 +28,7 @@ async function linkGoogle(code: string) {
       code: code,
       client_id: Deno.env.get("GOOGLE_ID")!,
       client_secret: Deno.env.get("GOOGLE_SECRET")!,
-      redirect_uri: Deno.env.get("GOOGLE_REDIRECT_URI")!,
+      redirect_uri: Deno.env.get("REDIRECT_URI")! + redirect_uri_path,
       scope: "",
       grant_type: "authorization_code",
     }),
@@ -109,7 +109,7 @@ async function authenticate(ctx: Context) {
     refreshToken,
     tokenExpiresIn,
     actualTime,
-  } = await linkGoogle(code);
+  } = await linkGoogle(code, "/login/google");
 
   // Get the user ID / create a new user if not found
   const users = await db.select().from(userSchema).where(
@@ -180,7 +180,7 @@ async function authorize(ctx: Context) {
     tokenExpiresIn,
     refreshToken,
     actualTime,
-  } = await linkGoogle(code);
+  } = await linkGoogle(code, "/services/google");
 
   await db.insert(oauthSchema).values({
     userId,
