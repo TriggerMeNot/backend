@@ -53,7 +53,7 @@ const SERVICES: Record<string, Service> = {
   },
   "Google": {
     actions: {
-      "On New Email": {
+      "On New Email (Gmail)": {
         description:
           "Check at each time of the interval if there is a unread email in the inbox",
         settings: zodToJsonSchema(OnNewEmailSettings),

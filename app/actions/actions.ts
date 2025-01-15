@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm/expressions";
 import { actions as actionSchema } from "../schemas/actions.ts";
 import { actionsPlayground as actionPlaygroundSchema } from "../schemas/actionsPlayground.ts";
 import { IntervalBasedCronScheduler } from "cron-schedule/schedulers/interval-based";
+import { crons as cronSchema } from "../schemas/crons.ts";
 import triggerMeNot from "./triggerMeNot.ts";
 import google from "./google.ts";
 import discord from "./discord.ts";
@@ -18,7 +19,7 @@ async function init(
     case "On Fetch":
       await triggerMeNot.OnFetch(ctx, actionPlayground, playgroundId);
       break;
-    case "On New Email":
+    case "On New Email (Gmail)":
       await google.OnNewEmail(ctx, actionPlayground, playgroundId);
       break;
     case "On New Message":
@@ -40,8 +41,6 @@ async function init(
 
 const scheduler = new IntervalBasedCronScheduler(60 * 1000);
 
-import { crons as cronSchema } from "../schemas/crons.ts";
-
 for (
   const cron of await db.select().from(cronSchema).innerJoin(
     actionPlaygroundSchema,
@@ -52,7 +51,7 @@ for (
   )
 ) {
   switch (cron.actions.name) {
-    case "On New Email":
+    case "On New Email (Gmail)":
       google.cronOnNewEmail(cron.crons);
       break;
     case "On New Message":
