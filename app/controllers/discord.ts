@@ -34,10 +34,6 @@ async function linkDiscord(code: string, redirect_uri_path: string) {
     }),
   })
     .then((res) => res.json())
-    .then((data) => {
-      console.log(data);
-      return data;
-    })
     .catch((err) => {
       throw {
         status: 400,

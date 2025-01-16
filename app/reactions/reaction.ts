@@ -4,6 +4,7 @@ import triggerMeNot from "./triggerMeNot.ts";
 import github from "./github.ts";
 import google from "./google.ts";
 import microsoft from "./microsoft.ts";
+import discord from "./discord.ts";
 
 async function run(reaction: ReactionTrigger) {
   try {
@@ -19,6 +20,12 @@ async function run(reaction: ReactionTrigger) {
         break;
       case "Send Email (Outlook)":
         await microsoft.sendEmail(reaction);
+        break;
+      case "Send Message":
+        await discord.sendMessage(reaction);
+        break;
+      case "Send TTS Message":
+        await discord.sendTTSMessage(reaction);
         break;
       default:
         throw new Error("Reaction not found");

@@ -15,7 +15,11 @@ import {
   OnNewEmailOutlookSettings,
   SendEmailOutlookSettings,
 } from "../interfaces/microsoft.ts";
-import { OnNewMessageSettings } from "../interfaces/discord.ts";
+import {
+  OnNewMessageSettings,
+  SendMessageSettings,
+  SendTTSMessageSettings,
+} from "../interfaces/discord.ts";
 
 interface Element {
   id?: number;
@@ -78,6 +82,16 @@ const SERVICES: Record<string, Service> = {
       "On New Message": {
         description: "When a message as been sent in the last 5 minutes",
         settings: zodToJsonSchema(OnNewMessageSettings),
+      },
+    },
+    reactions: {
+      "Send Message": {
+        description: "Send a message to a channel",
+        settings: zodToJsonSchema(SendMessageSettings),
+      },
+      "Send TTS Message": {
+        description: "Send a TTS message to a channel",
+        settings: zodToJsonSchema(SendTTSMessageSettings),
       },
     },
   },
