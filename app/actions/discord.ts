@@ -64,7 +64,7 @@ function cronOnNewMessage(
       >;
 
       const response = await fetch(
-        `https://discord.com/api/channels/${settings.channel_id}/messages?limit=1`,
+        `https://discord.com/api/channels/${settings.channelId}/messages?limit=1`,
         {
           headers: {
             Authorization: `Bot ${Deno.env.get("DISCORD_BOT_TOKEN")}`,
