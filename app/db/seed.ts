@@ -30,12 +30,15 @@ interface Element {
 
 interface Service {
   id?: number;
+  description: string;
   actions?: Record<string, Element>;
   reactions?: Record<string, Element>;
 }
 
 const SERVICES: Record<string, Service> = {
   "TriggerMeNot": {
+    description:
+      "TriggerMeNot is the default service, I do not need to login to an external service to use it.",
     actions: {
       "On Fetch": {
         description: "When it fetches",
@@ -50,6 +53,8 @@ const SERVICES: Record<string, Service> = {
     },
   },
   "GitHub": {
+    description:
+      "GitHub is a code hosting platform for version control and collaboration.",
     actions: {
       "On Pull Request Opened": {
         description: "When a pull request is opened",
@@ -63,6 +68,8 @@ const SERVICES: Record<string, Service> = {
     },
   },
   "Google": {
+    description:
+      "Google is an American multinational technology company that specializes in Internet-related services and products.",
     actions: {
       "On New Email (Gmail)": {
         description:
@@ -78,6 +85,8 @@ const SERVICES: Record<string, Service> = {
     },
   },
   "Discord": {
+    description:
+      "Discord is a proprietary freeware VoIP application and digital distribution platform designed for video gaming communities.",
     actions: {
       "On New Message": {
         description: "When a message as been sent in the last 5 minutes",
@@ -96,6 +105,8 @@ const SERVICES: Record<string, Service> = {
     },
   },
   "Microsoft": {
+    description:
+      "Microsoft is an American multinational technology company with headquarters in Redmond, Washington.",
     actions: {
       "On New Email (Outlook)": {
         description:
@@ -117,6 +128,7 @@ async function seedDatabase() {
     // Insert service
     const serviceRecord = await db.insert(serviceSchema).values({
       name: serviceName,
+      description: service.description,
     }).onConflictDoNothing().returning();
 
     if (!serviceRecord.length) {

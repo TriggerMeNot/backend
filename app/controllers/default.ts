@@ -14,6 +14,7 @@ async function about(ctx: Context) {
   for (const service of await db.select().from(serviceSchema)) {
     services.push({
       name: service.name,
+      description: service.description,
       actions: await db.select({
         id: actionSchema.id,
         name: actionSchema.name,
