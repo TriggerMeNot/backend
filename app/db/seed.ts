@@ -7,7 +7,14 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 
 import { FetchSettings, OnFetchParams } from "../interfaces/triggerMeNot.ts";
 import { GithubIssueSettings } from "../interfaces/github.ts";
-import { OnNewEmailSettings, SendEmailSettings } from "../interfaces/google.ts";
+import {
+  OnNewEmailGmailSettings,
+  SendEmailGmailSettings,
+} from "../interfaces/google.ts";
+import {
+  OnNewEmailOutlookSettings,
+  SendEmailOutlookSettings,
+} from "../interfaces/microsoft.ts";
 import { OnNewMessageSettings } from "../interfaces/discord.ts";
 
 interface Element {
@@ -56,13 +63,13 @@ const SERVICES: Record<string, Service> = {
       "On New Email (Gmail)": {
         description:
           "Check at each time of the interval if there is a unread email in the inbox",
-        settings: zodToJsonSchema(OnNewEmailSettings),
+        settings: zodToJsonSchema(OnNewEmailGmailSettings),
       },
     },
     reactions: {
-      "Send Email": {
+      "Send Email (Gmail)": {
         description: "Send an email using the Gmail API",
-        settings: zodToJsonSchema(SendEmailSettings),
+        settings: zodToJsonSchema(SendEmailGmailSettings),
       },
     },
   },
@@ -74,7 +81,21 @@ const SERVICES: Record<string, Service> = {
       },
     },
   },
-  "Microsoft": {},
+  "Microsoft": {
+    actions: {
+      "On New Email (Outlook)": {
+        description:
+          "Check at each time of the interval if there is a unread email in the inbox",
+        settings: zodToJsonSchema(OnNewEmailOutlookSettings),
+      },
+    },
+    reactions: {
+      "Send Email (Outlook)": {
+        description: "Send an email using the Outlook API",
+        settings: zodToJsonSchema(SendEmailOutlookSettings),
+      },
+    },
+  },
 };
 
 async function seedDatabase() {
