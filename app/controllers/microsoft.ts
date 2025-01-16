@@ -83,18 +83,24 @@ async function microsoftRefreshToken(
     access_token: token,
     expires_in: tokenExpiresIn,
     refresh_token: newRefreshToken,
-  } = await fetch("https://microsoft.com/api/oauth2/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
+  } = await fetch(
+    `https://login.microsoftonline.com/${
+      Deno.env.get("MICROSOFT_TENANT")
+    }/oauth2/v2.0/token`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        client_id: Deno.env.get("MICROSOFT_ID")!,
+        client_secret: Deno.env.get("MICROSOFT_SECRET")!,
+        grant_type: "refresh_token",
+        scope: Deno.env.get("MICROSOFT_SCOPE")!,
+        refresh_token: refreshToken,
+      }),
     },
-    body: new URLSearchParams({
-      client_id: Deno.env.get("MICROSOFT_ID")!,
-      client_secret: Deno.env.get("MICROSOFT_SECRET")!,
-      grant_type: "refresh_token",
-      refresh_token: refreshToken,
-    }),
-  })
+  )
     .then((res) => res.json());
 
   await db.update(oauthSchema).set({

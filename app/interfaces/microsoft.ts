@@ -15,3 +15,14 @@ export default {
   },
 };
 
+const OnNewEmailOutlookSettings = z.object({
+  cron: z.string(),
+});
+
+const SendEmailOutlookSettings = z.object({
+  to: z.string(),
+  subject: z.string(),
+  body: z.string(),
+});
+
+export { OnNewEmailOutlookSettings, SendEmailOutlookSettings };

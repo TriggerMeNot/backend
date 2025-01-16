@@ -8,6 +8,7 @@ import { crons as cronSchema } from "../schemas/crons.ts";
 import triggerMeNot from "./triggerMeNot.ts";
 import google from "./google.ts";
 import discord from "./discord.ts";
+import microsoft from "./microsoft.ts";
 
 async function init(
   ctx: Context,
@@ -21,6 +22,9 @@ async function init(
       break;
     case "On New Email (Gmail)":
       await google.OnNewEmail(ctx, actionPlayground, playgroundId);
+      break;
+    case "On New Email (Outlook)":
+      await microsoft.OnNewEmail(ctx, actionPlayground, playgroundId);
       break;
     case "On New Message":
       await discord.OnNewMessage(ctx, actionPlayground, playgroundId);
@@ -53,6 +57,9 @@ for (
   switch (cron.actions.name) {
     case "On New Email (Gmail)":
       google.cronOnNewEmail(cron.crons);
+      break;
+    case "On New Email (Outlook)":
+      microsoft.cronOnNewEmail(cron.crons);
       break;
     case "On New Message":
       discord.cronOnNewMessage(cron.crons);
