@@ -97,11 +97,12 @@ async function OnEmailFromUser(
     cron: (actionPlayground.settings as { cron: string }).cron,
   }).returning();
 
-  cronOnEmailFromUser(cron[0]);
+  cronOnEmailFromUser(cron[0], actionPlayground);
 }
 
 function cronOnEmailFromUser(
   cron: typeof cronSchema.$inferSelect,
+  actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
 ) {
   async function task() {
     try {
@@ -135,7 +136,7 @@ function cronOnEmailFromUser(
       const response = await fetch(
         `https://gmail.googleapis.com/gmail/v1/users/${
           data[0].oauths.serviceUserId
-        }/messages?q=from:${actionPlayground.settings.email}`,
+        }/messages?q=from:${(actionPlayground.settings as { email: string }).email}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -172,11 +173,12 @@ async function OnEmailWithTitle(
     cron: (actionPlayground.settings as { cron: string }).cron,
   }).returning();
 
-  cronOnEmailWithTitle(cron[0]);
+  cronOnEmailWithTitle(cron[0], actionPlayground);
 }
 
 function cronOnEmailWithTitle(
   cron: typeof cronSchema.$inferSelect,
+  actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
 ) {
   async function task() {
     try {
@@ -210,7 +212,7 @@ function cronOnEmailWithTitle(
       const response = await fetch(
         `https://gmail.googleapis.com/gmail/v1/users/${
           data[0].oauths.serviceUserId
-        }/messages?q=subject:${actionPlayground.settings.subject}`,
+        }/messages?q=subject:${(actionPlayground.settings as { subject: string }).subject}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

@@ -7,7 +7,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 
 import { FetchSettings, OnFetchParams } from "../interfaces/triggerMeNot.ts";
 import { GithubIssueSettings } from "../interfaces/github.ts";
-import { OnNewEmailSettings, SendEmailSettings } from "../interfaces/google.ts";
+import { OnNewEmailSettings, SendEmailSettings, OnEmailFromUserSettings, OnEmailWithTitleSettings } from "../interfaces/google.ts";
 import { OnNewMessageSettings } from "../interfaces/discord.ts";
 
 interface Element {
@@ -57,6 +57,14 @@ const SERVICES: Record<string, Service> = {
         description:
           "Check at each time of the interval if there is a unread email in the inbox",
         settings: zodToJsonSchema(OnNewEmailSettings),
+      },
+      "On Email From User": {
+        description: "Check at each time of the interval if there is a email from a specific user",
+        settings: zodToJsonSchema(OnEmailFromUserSettings),
+      },
+      "On Email With Title": {
+        description: "Check at each time of the interval if there is a email with a specific title",
+        settings: zodToJsonSchema(OnEmailWithTitleSettings),
       },
     },
     reactions: {
