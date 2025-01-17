@@ -136,7 +136,7 @@ function cronOnEmailFromUser(
       const response = await fetch(
         `https://gmail.googleapis.com/gmail/v1/users/${
           data[0].oauths.serviceUserId
-        }/messages?q=from:${(actionPlayground.settings as { email: string }).email}`,
+        }/messages?q=from:${(actionPlayground.settings as { email: string }).email} is:unread`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -212,7 +212,7 @@ function cronOnEmailWithTitle(
       const response = await fetch(
         `https://gmail.googleapis.com/gmail/v1/users/${
           data[0].oauths.serviceUserId
-        }/messages?q=subject:${(actionPlayground.settings as { subject: string }).subject}`,
+        }/messages?q=subject:${(actionPlayground.settings as { subject: string }).subject} is:unread`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
