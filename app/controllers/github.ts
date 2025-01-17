@@ -9,10 +9,22 @@ import { sign } from "@hono/jwt";
 import { actionsTriggers } from "../utils/trigger.ts";
 
 if (
-  !Deno.env.get("GITHUB_ID") || !Deno.env.get("GITHUB_SECRET") ||
-  !Deno.env.get("JWT_SECRET")
+  !Deno.env.has("GITHUB_ID") || !Deno.env.has("GITHUB_SECRET") ||
+  !Deno.env.has("GITHUB_APP") || !Deno.env.has("JWT_SECRET")
 ) {
   throw new Error("Environment variables for GitHub OAuth or JWT not set");
+}
+
+function getURI(ctx: Context) {
+  return ctx.json({
+    authenticate: `https://github.com/login/oauth/authorize` +
+      `?client_id=${Deno.env.get("GITHUB_ID")}` +
+      `&redirect_uri=${Deno.env.get("REDIRECT_URI")}/login/github`,
+
+    authorize: `https://github.com/apps/${
+      Deno.env.get("GITHUB_APP")
+    }/installations/new`,
+  });
 }
 
 async function linkGithub(code: string) {
@@ -216,4 +228,4 @@ async function webhook(ctx: Context) {
   return ctx.json({ message: "Webhook received" });
 }
 
-export default { authenticate, authorize, webhook, isAuthorized };
+export default { getURI, authenticate, authorize, webhook, isAuthorized };

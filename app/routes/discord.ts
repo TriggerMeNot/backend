@@ -7,6 +7,20 @@ import DiscordController from "../controllers/discord.ts";
 
 const discordRouter = new Hono();
 
+discordRouter.get(
+  "/uri",
+  describeRoute({
+    tags: ["auth", "discord"],
+    description: "Get Discord OAuth URIs",
+    responses: {
+      200: {
+        description: "Successful response",
+      },
+    },
+  }),
+  DiscordController.getURI,
+);
+
 discordRouter.post(
   "/authenticate",
   describeRoute({

@@ -14,6 +14,26 @@ if (
   throw new Error("Environment variables for Discord OAuth or JWT not set");
 }
 
+function getURI(ctx: Context) {
+  return ctx.json({
+    authenticate: `https://discord.com/oauth2/authorize` +
+      `?client_id=${Deno.env.get("DISCORD_ID")}` +
+      `&permissions=562949953427456` +
+      `&response_type=code` +
+      `&redirect_uri=${Deno.env.get("REDIRECT_URI")}/login/discord` +
+      `&integration_type=0` +
+      `&scope=identify+email`,
+
+    authorize: `https://discord.com/oauth2/authorize` +
+      `?client_id=${Deno.env.get("DISCORD_ID")}` +
+      `&permissions=562949953427456` +
+      `&response_type=code` +
+      `&redirect_uri=${Deno.env.get("REDIRECT_URI")}/services/discord` +
+      `&integration_type=0` +
+      `&scope=identify+email+bot`,
+  });
+}
+
 async function linkDiscord(code: string, redirect_uri_path: string) {
   // Get the access token and refresh token
   const {
@@ -211,4 +231,10 @@ async function authorize(ctx: Context) {
   return ctx.json({ message: "Connection successful" });
 }
 
-export default { authenticate, authorize, isAuthorized, discordRefreshToken };
+export default {
+  getURI,
+  authenticate,
+  authorize,
+  isAuthorized,
+  discordRefreshToken,
+};

@@ -7,6 +7,20 @@ import MicrosoftController from "../controllers/microsoft.ts";
 
 const microsoftRouter = new Hono();
 
+microsoftRouter.get(
+  "/uri",
+  describeRoute({
+    tags: ["auth", "microsoft"],
+    description: "Get Microsoft OAuth URIs",
+    responses: {
+      200: {
+        description: "Successful response",
+      },
+    },
+  }),
+  MicrosoftController.getURI,
+);
+
 microsoftRouter.post(
   "/authenticate",
   describeRoute({
