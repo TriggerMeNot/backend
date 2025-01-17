@@ -20,6 +20,7 @@ import {
   SendMessageSettings,
   SendTTSMessageSettings,
 } from "../interfaces/discord.ts";
+import { AtTimeSettings } from "../interfaces/default.ts";
 
 interface Element {
   id?: number;
@@ -43,6 +44,10 @@ const SERVICES: Record<string, Service> = {
       "On Fetch": {
         description: "When it fetches",
         params: zodToJsonSchema(OnFetchParams),
+      },
+      "At Time": {
+        description: "At a specific time, depending on the cron expression",
+        settings: zodToJsonSchema(AtTimeSettings),
       },
     },
     reactions: {
