@@ -199,7 +199,7 @@ async function authorize(ctx: Context) {
     refreshToken,
     refreshTokenExpiresAt: actualTime + (365 * 24 * 60 * 60), // 1 year in seconds
   }).onConflictDoUpdate({
-    target: [oidcSchema.userId, oidcSchema.serviceId],
+    target: [oauthSchema.userId, oauthSchema.serviceId],
     set: {
       token,
       tokenExpiresAt: actualTime + tokenExpiresIn,
