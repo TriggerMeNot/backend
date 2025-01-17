@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import { users as userSchema } from "../schemas/users.ts";
 import { oauths as oauthSchema } from "../schemas/oauths.ts";
+import { oidcs as oidcsSchema } from "../schemas/oidcs.ts";
 import { services as serviceSchema } from "../schemas/services.ts";
 import { reactions as reactionSchema } from "../schemas/reactions.ts";
 import { actions as actionSchema } from "../schemas/actions.ts";
@@ -10,6 +11,7 @@ import { actionsPlayground as actionPlaygroundSchema } from "../schemas/actionsP
 import { reactionLinks as reactionLinkSchema } from "../schemas/reactionLinks.ts";
 import { actionLinks as actionLinkSchema } from "../schemas/actionLinks.ts";
 import { playgrounds as playgroundSchema } from "../schemas/playgrounds.ts";
+import { crons as cornsSchema } from "../schemas/crons.ts";
 
 if (!Deno.env.get("DATABASE_URL")) {
   console.error("Please set DATABASE_URL in the environment variables");
@@ -25,6 +27,7 @@ export const db = drizzle({
   schema: {
     userSchema,
     oauthSchema,
+    oidcsSchema,
     serviceSchema,
     reactionSchema,
     actionSchema,
@@ -33,5 +36,6 @@ export const db = drizzle({
     reactionLinkSchema,
     actionLinkSchema,
     playgroundSchema,
+    cornsSchema,
   },
 });
