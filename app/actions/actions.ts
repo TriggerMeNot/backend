@@ -9,6 +9,7 @@ import triggerMeNot from "./triggerMeNot.ts";
 import google from "./google.ts";
 import discord from "./discord.ts";
 import microsoft from "./microsoft.ts";
+import defaultActions from "./default.ts";
 
 async function init(
   ctx: Context,
@@ -28,6 +29,9 @@ async function init(
       break;
     case "On New Message":
       await discord.OnNewMessage(ctx, actionPlayground, playgroundId);
+      break;
+    case "At Time":
+      await defaultActions.AtTime(ctx, actionPlayground, playgroundId);
       break;
   }
 
@@ -63,6 +67,9 @@ for (
       break;
     case "On New Message":
       discord.cronOnNewMessage(cron.crons);
+      break;
+    case "At Time":
+      defaultActions.cronAtTime(cron.crons);
       break;
   }
 }
