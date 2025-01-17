@@ -13,11 +13,6 @@ import { actionLinks as actionLinkSchema } from "../schemas/actionLinks.ts";
 import { playgrounds as playgroundSchema } from "../schemas/playgrounds.ts";
 import { crons as cornsSchema } from "../schemas/crons.ts";
 
-if (!Deno.env.get("DATABASE_URL")) {
-  console.error("Please set DATABASE_URL in the environment variables");
-  Deno.exit(1);
-}
-
 const { Pool } = pg;
 
 export const db = drizzle({

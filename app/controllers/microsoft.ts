@@ -7,14 +7,6 @@ import { oidcs as oidcSchema } from "../schemas/oidcs.ts";
 import { users as userSchema } from "../schemas/users.ts";
 import { sign } from "@hono/jwt";
 
-if (
-  !Deno.env.has("MICROSOFT_TENANT") || !Deno.env.has("MICROSOFT_ID") ||
-  !Deno.env.has("MICROSOFT_SECRET") || !Deno.env.has("MICROSOFT_SCOPE") ||
-  !Deno.env.has("JWT_SECRET")
-) {
-  throw new Error("Environment variables for Microsoft OAuth or JWT not set");
-}
-
 async function linkMicrosoft(code: string, redirect_uri_path: string) {
   // Get the access token and refresh token
   const {
