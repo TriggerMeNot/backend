@@ -7,20 +7,6 @@ import GoogleController from "../controllers/google.ts";
 
 const googleRouter = new Hono();
 
-googleRouter.get(
-  "/uri",
-  describeRoute({
-    tags: ["auth", "google"],
-    description: "Get Google OAuth URIs",
-    responses: {
-      200: {
-        description: "Successful response",
-      },
-    },
-  }),
-  GoogleController.getURI,
-);
-
 googleRouter.post(
   "/authenticate",
   describeRoute({

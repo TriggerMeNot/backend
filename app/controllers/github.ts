@@ -15,18 +15,6 @@ if (
   throw new Error("Environment variables for GitHub OAuth or JWT not set");
 }
 
-function getURI(ctx: Context) {
-  return ctx.json({
-    authenticate: `https://github.com/login/oauth/authorize` +
-      `?client_id=${Deno.env.get("GITHUB_ID")}` +
-      `&redirect_uri=${Deno.env.get("REDIRECT_URI")}/login/github`,
-
-    authorize: `https://github.com/apps/${
-      Deno.env.get("GITHUB_APP")
-    }/installations/new`,
-  });
-}
-
 async function linkGithub(code: string) {
   // Get the access token and refresh token
   const {
@@ -228,4 +216,9 @@ async function webhook(ctx: Context) {
   return ctx.json({ message: "Webhook received" });
 }
 
-export default { getURI, authenticate, authorize, webhook, isAuthorized };
+export default {
+  authenticate,
+  authorize,
+  webhook,
+  isAuthorized,
+};

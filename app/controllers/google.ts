@@ -14,26 +14,6 @@ if (
   throw new Error("Environment variables for Google OAuth or JWT not set");
 }
 
-function getURI(ctx: Context) {
-  return ctx.json({
-    authenticate: `https://accounts.google.com/o/oauth2/v2/auth` +
-      `?redirect_uri=${Deno.env.get("REDIRECT_URI")}/login/google` +
-      `&prompt=consent` +
-      `&response_type=code` +
-      `&client_id=${Deno.env.get("GOOGLE_ID")}` +
-      `&scope=https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/userinfo.profile` +
-      `&access_type=offline`,
-
-    authorize: `https://accounts.google.com/o/oauth2/auth` +
-      `?client_id=${Deno.env.get("GOOGLE_ID")}` +
-      `&redirect_uri=${Deno.env.get("REDIRECT_URI")}/services/google` +
-      `&prompt=consent` +
-      `&response_type=code` +
-      `&scope=https://mail.google.com/+https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/userinfo.profile` +
-      `&access_type=offline`,
-  });
-}
-
 async function linkGoogle(code: string, redirect_uri_path: string) {
   const {
     access_token: token,
@@ -224,7 +204,6 @@ async function authorize(ctx: Context) {
 }
 
 export default {
-  getURI,
   authenticate,
   authorize,
   isAuthorized,
