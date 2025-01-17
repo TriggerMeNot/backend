@@ -5,11 +5,6 @@ import { users as userSchema } from "../schemas/users.ts";
 import { eq } from "drizzle-orm/expressions";
 import * as bcrypt from "bcrypt";
 
-if (!Deno.env.get("SALT_ROUNDS")) {
-  console.error("Please set the SALT_ROUNDS environment variable");
-  Deno.exit(1);
-}
-
 async function login(ctx: Context) {
   // @ts-ignore - The `form` validator is added by the `validator` middleware
   const { email, password } = ctx.req.valid("form");

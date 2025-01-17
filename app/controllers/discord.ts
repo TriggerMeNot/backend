@@ -7,13 +7,6 @@ import { oidcs as oidcSchema } from "../schemas/oidcs.ts";
 import { users as userSchema } from "../schemas/users.ts";
 import { sign } from "@hono/jwt";
 
-if (
-  !Deno.env.has("DISCORD_ID") || !Deno.env.has("DISCORD_SECRET") ||
-  !Deno.env.has("JWT_SECRET")
-) {
-  throw new Error("Environment variables for Discord OAuth or JWT not set");
-}
-
 async function linkDiscord(code: string, redirect_uri_path: string) {
   // Get the access token and refresh token
   const {

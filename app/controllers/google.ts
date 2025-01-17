@@ -7,13 +7,6 @@ import { oidcs as oidcSchema } from "../schemas/oidcs.ts";
 import { users as userSchema } from "../schemas/users.ts";
 import { sign } from "@hono/jwt";
 
-if (
-  !Deno.env.has("GOOGLE_ID") || !Deno.env.has("GOOGLE_SECRET") ||
-  !Deno.env.has("JWT_SECRET")
-) {
-  throw new Error("Environment variables for Google OAuth or JWT not set");
-}
-
 async function linkGoogle(code: string, redirect_uri_path: string) {
   const {
     access_token: token,

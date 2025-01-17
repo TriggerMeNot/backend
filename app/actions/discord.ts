@@ -13,10 +13,6 @@ import { actionTrigger } from "../utils/trigger.ts";
 import type { OnNewMessageSettings } from "../interfaces/discord.ts";
 import z from "zod";
 
-if (!Deno.env.has("DISCORD_BOT_TOKEN")) {
-  throw new Error("Environment variable for Discord Bot Token not set");
-}
-
 async function OnNewMessage(
   _ctx: Context,
   actionPlayground: typeof actionPlaygroundSchema.$inferSelect,

@@ -8,13 +8,6 @@ import { users as userSchema } from "../schemas/users.ts";
 import { sign } from "@hono/jwt";
 import { actionsTriggers } from "../utils/trigger.ts";
 
-if (
-  !Deno.env.has("GITHUB_ID") || !Deno.env.has("GITHUB_SECRET") ||
-  !Deno.env.has("GITHUB_APP") || !Deno.env.has("JWT_SECRET")
-) {
-  throw new Error("Environment variables for GitHub OAuth or JWT not set");
-}
-
 async function linkGithub(code: string) {
   // Get the access token and refresh token
   const {
