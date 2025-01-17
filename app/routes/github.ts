@@ -7,6 +7,20 @@ import GithubController from "../controllers/github.ts";
 
 const githubRouter = new Hono();
 
+githubRouter.get(
+  "/uri",
+  describeRoute({
+    tags: ["auth", "github"],
+    description: "Get Github OAuth URIs",
+    responses: {
+      200: {
+        description: "Successful response",
+      },
+    },
+  }),
+  GithubController.getURI,
+);
+
 githubRouter.post(
   "/webhook",
   describeRoute({

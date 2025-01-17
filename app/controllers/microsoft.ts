@@ -15,6 +15,34 @@ if (
   throw new Error("Environment variables for Microsoft OAuth or JWT not set");
 }
 
+function getURI(ctx: Context) {
+  return ctx.json({
+    authenticate:
+      `https://login.microsoftonline.com/${
+        Deno.env.get("MICROSOFT_TENANT")
+      }/oauth2/v2.0/authorize?` +
+      `client_id=${Deno.env.get("MICROSOFT_ID")}&` +
+      `response_type=code&` +
+      `redirect_uri=${Deno.env.get("REDIRECT_URI")}/login/microsoft&` +
+      `response_mode=query&` +
+      `scope=${Deno.env.get("MICROSOFT_SCOPE")}&` +
+      `state=12345&` +
+      `sso_reload=true`,
+
+    authorize:
+      `https://login.microsoftonline.com/${
+        Deno.env.get("MICROSOFT_TENANT")
+      }/oauth2/v2.0/authorize` +
+      `?client_id=${Deno.env.get("MICROSOFT_ID")}` +
+      `&response_type=code` +
+      `&redirect_uri=${Deno.env.get("REDIRECT_URI")}/services/microsoft` +
+      `&response_mode=query` +
+      `&scope=${Deno.env.get("MICROSOFT_SCOPE")}` +
+      `&state=12345` +
+      `&sso_reload=true`,
+  });
+}
+
 async function linkMicrosoft(code: string, redirect_uri_path: string) {
   // Get the access token and refresh token
   const {
@@ -224,4 +252,10 @@ async function authorize(ctx: Context) {
   return ctx.json({ message: "Connection successful" });
 }
 
-export default { authenticate, authorize, isAuthorized, microsoftRefreshToken };
+export default {
+  getURI,
+  authenticate,
+  authorize,
+  isAuthorized,
+  microsoftRefreshToken,
+};
