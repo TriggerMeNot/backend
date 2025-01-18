@@ -32,3 +32,9 @@ export default {
     }),
   },
 };
+
+const AtTimeSettings = z.object({
+  cron: z.string(),
+});
+
+export { AtTimeSettings };

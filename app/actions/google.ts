@@ -57,7 +57,9 @@ function cronOnNewEmail(
         )
         : data[0].oauths.token;
 
-      const response = await fetch(
+      const {
+        emails,
+      } = await fetch(
         `https://gmail.googleapis.com/gmail/v1/users/${
           data[0].oauths.serviceUserId
         }/messages?q=is:unread in:inbox`,
@@ -66,14 +68,22 @@ function cronOnNewEmail(
             Authorization: `Bearer ${accessToken}`,
           },
         },
-      );
-      const emails = await response.json() as {
-        resultSizeEstimate: number;
-        messages?: Array<{
-          id: string;
-          threadId: string;
-        }>;
-      };
+      )
+        .then((res) => {
+          if (!res.ok) {
+            throw {
+              status: res.status,
+              body: res.statusText,
+            };
+          }
+          return res.json();
+        })
+        .catch((err) => {
+          throw {
+            status: 400,
+            body: err,
+          };
+        });
 
       if (emails.resultSizeEstimate > 0) {
         actionTrigger(cron.actionPlaygroundId, {});

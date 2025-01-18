@@ -16,8 +16,18 @@ export default {
 };
 
 const OnNewMessageSettings = z.object({
-  channel_id: z.string(),
+  channelId: z.string(),
   cron: z.string(),
 });
 
-export { OnNewMessageSettings };
+const SendMessageSettings = z.object({
+  channelId: z.string(),
+  message: z.string(),
+});
+
+const SendTTSMessageSettings = z.object({
+  channelId: z.string(),
+  message: z.string(),
+});
+
+export { OnNewMessageSettings, SendMessageSettings, SendTTSMessageSettings };

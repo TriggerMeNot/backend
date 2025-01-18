@@ -10,27 +10,22 @@ import { scheduler } from "./actions.ts";
 import { parseCronExpression } from "cron-schedule";
 import { SERVICES } from "../db/seed.ts";
 import { actionTrigger } from "../utils/trigger.ts";
-import type { OnNewMessageSettings } from "../interfaces/discord.ts";
-import z from "zod";
+import microsoftController from "../controllers/microsoft.ts";
 
-async function OnNewMessage(
+async function OnNewEmail(
   _ctx: Context,
   actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
   _playgroundId: number,
 ) {
-  const settings = actionPlayground.settings as z.infer<
-    typeof OnNewMessageSettings
-  >;
-
   const cron = await db.insert(cronSchema).values({
     actionPlaygroundId: actionPlayground.id,
-    cron: settings.cron,
+    cron: (actionPlayground.settings as { cron: string }).cron,
   }).returning();
 
-  cronOnNewMessage(cron[0]);
+  cronOnNewEmail(cron[0]);
 }
 
-function cronOnNewMessage(
+function cronOnNewEmail(
   cron: typeof cronSchema.$inferSelect,
 ) {
   async function task() {
@@ -47,7 +42,7 @@ function cronOnNewMessage(
         oauthSchema,
         and(
           eq(oauthSchema.userId, userSchema.id),
-          eq(oauthSchema.serviceId, SERVICES.Discord.id!),
+          eq(oauthSchema.serviceId, SERVICES.Microsoft.id!),
         ),
       ).limit(1);
 
@@ -55,16 +50,17 @@ function cronOnNewMessage(
         return;
       }
 
-      const settings = data[0].actionsPlayground.settings as z.infer<
-        typeof OnNewMessageSettings
-      >;
+      const accessToken = (data[0].oauths.tokenExpiresAt < Date.now())
+        ? await microsoftController.microsoftRefreshToken(
+          data[0].users.id,
+          data[0].oauths.refreshToken,
+        )
+        : data[0].oauths.token;
 
       const response = await fetch(
-        `https://discord.com/api/channels/${settings.channelId}/messages?limit=1`,
+        `https://graph.microsoft.com/v1.0/me/mailFolders('Inbox')/messages?$filter=isRead eq false`,
         {
-          headers: {
-            Authorization: `Bot ${Deno.env.get("DISCORD_BOT_TOKEN")}`,
-          },
+          headers: { Authorization: `Bearer ${accessToken}` },
         },
       )
         .then((res) => {
@@ -83,13 +79,8 @@ function cronOnNewMessage(
           };
         });
 
-      if (response.length > 0) {
-        const messageDate = new Date(response[0].timestamp).getTime();
-        const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
-
-        if (messageDate > fiveMinutesAgo) {
-          actionTrigger(cron.actionPlaygroundId, {});
-        }
+      if (response.value.length > 0) {
+        actionTrigger(cron.actionPlaygroundId, {});
       }
     } catch (error) {
       console.error("Error: ", error);
@@ -100,4 +91,4 @@ function cronOnNewMessage(
   scheduler.registerTask(parseCronExpression(cron.cron), task);
 }
 
-export default { OnNewMessage, cronOnNewMessage };
+export default { OnNewEmail, cronOnNewEmail };

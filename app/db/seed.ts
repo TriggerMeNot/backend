@@ -7,6 +7,20 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 
 import { FetchSettings, OnFetchParams } from "../interfaces/triggerMeNot.ts";
 import { GithubIssueSettings } from "../interfaces/github.ts";
+import {
+  OnNewEmailGmailSettings,
+  SendEmailGmailSettings,
+} from "../interfaces/google.ts";
+import {
+  OnNewEmailOutlookSettings,
+  SendEmailOutlookSettings,
+} from "../interfaces/microsoft.ts";
+import {
+  OnNewMessageSettings,
+  SendMessageSettings,
+  SendTTSMessageSettings,
+} from "../interfaces/discord.ts";
+import { AtTimeSettings } from "../interfaces/default.ts";
 import { OnNewEmailSettings, SendEmailSettings, OnEmailFromUserSettings, OnEmailWithTitleSettings } from "../interfaces/google.ts";
 import { OnNewMessageSettings } from "../interfaces/discord.ts";
 
@@ -19,16 +33,23 @@ interface Element {
 
 interface Service {
   id?: number;
+  description: string;
   actions?: Record<string, Element>;
   reactions?: Record<string, Element>;
 }
 
 const SERVICES: Record<string, Service> = {
   "TriggerMeNot": {
+    description:
+      "TriggerMeNot is the default service, I do not need to login to an external service to use it.",
     actions: {
       "On Fetch": {
         description: "When it fetches",
         params: zodToJsonSchema(OnFetchParams),
+      },
+      "At Time": {
+        description: "At a specific time, depending on the cron expression",
+        settings: zodToJsonSchema(AtTimeSettings),
       },
     },
     reactions: {
@@ -39,6 +60,8 @@ const SERVICES: Record<string, Service> = {
     },
   },
   "GitHub": {
+    description:
+      "GitHub is a code hosting platform for version control and collaboration.",
     actions: {
       "On Pull Request Opened": {
         description: "When a pull request is opened",
@@ -52,11 +75,13 @@ const SERVICES: Record<string, Service> = {
     },
   },
   "Google": {
+    description:
+      "Google is an American multinational technology company that specializes in Internet-related services and products.",
     actions: {
-      "On New Email": {
+      "On New Email (Gmail)": {
         description:
           "Check at each time of the interval if there is a unread email in the inbox",
-        settings: zodToJsonSchema(OnNewEmailSettings),
+        settings: zodToJsonSchema(OnNewEmailGmailSettings),
       },
       "On Email From User": {
         description: "Check at each time of the interval if there is a email from a specific user",
@@ -66,23 +91,55 @@ const SERVICES: Record<string, Service> = {
         description: "Check at each time of the interval if there is a email with a specific title",
         settings: zodToJsonSchema(OnEmailWithTitleSettings),
       },
+      "On Email From User": {
+        description: "Check at each time of the interval if there is a email from a specific user",
+        settings: zodToJsonSchema(OnEmailFromUserSettings),
+      }
     },
     reactions: {
-      "Send Email": {
+      "Send Email (Gmail)": {
         description: "Send an email using the Gmail API",
-        settings: zodToJsonSchema(SendEmailSettings),
+        settings: zodToJsonSchema(SendEmailGmailSettings),
       },
     },
   },
   "Discord": {
+    description:
+      "Discord is a proprietary freeware VoIP application and digital distribution platform designed for video gaming communities.",
     actions: {
       "On New Message": {
         description: "When a message as been sent in the last 5 minutes",
         settings: zodToJsonSchema(OnNewMessageSettings),
       },
     },
+    reactions: {
+      "Send Message": {
+        description: "Send a message to a channel",
+        settings: zodToJsonSchema(SendMessageSettings),
+      },
+      "Send TTS Message": {
+        description: "Send a TTS message to a channel",
+        settings: zodToJsonSchema(SendTTSMessageSettings),
+      },
+    },
   },
-  "Microsoft": {},
+  "Microsoft": {
+    description:
+      "Microsoft is an American multinational technology company with headquarters in Redmond, Washington.",
+    actions: {
+      "On New Email (Outlook)": {
+        description:
+          "Check at each time of the interval if there is a unread email in the inbox",
+        settings: zodToJsonSchema(OnNewEmailOutlookSettings),
+      },
+    },
+    reactions: {
+      "Send Email (Outlook)": {
+        description: "Send an email using the Outlook API",
+        settings: zodToJsonSchema(SendEmailOutlookSettings),
+      },
+    },
+  },
 };
 
 async function seedDatabase() {
@@ -90,6 +147,7 @@ async function seedDatabase() {
     // Insert service
     const serviceRecord = await db.insert(serviceSchema).values({
       name: serviceName,
+      description: service.description,
     }).onConflictDoNothing().returning();
 
     if (!serviceRecord.length) {

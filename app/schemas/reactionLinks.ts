@@ -1,4 +1,4 @@
-import { integer, pgTable, serial } from "drizzle-orm/pg-core";
+import { integer, pgTable, serial, unique } from "drizzle-orm/pg-core";
 import { reactionsPlayground } from "./reactionsPlayground.ts";
 
 export const reactionLinks = pgTable("reactionLinks", {
@@ -11,4 +11,8 @@ export const reactionLinks = pgTable("reactionLinks", {
     () => reactionsPlayground.id,
     { onDelete: "cascade" },
   ),
+}, (table) => {
+  return {
+    unq: unique().on(table.triggerId, table.reactionId),
+  };
 });

@@ -34,7 +34,21 @@ async function createIssue(reaction: ReactionTrigger) {
       }),
     },
   )
-    .then((res) => res.json());
+    .then((res) => {
+      if (!res.ok) {
+        throw {
+          status: res.status,
+          body: res.statusText,
+        };
+      }
+      return res.json();
+    })
+    .catch((err) => {
+      throw {
+        status: 400,
+        body: err,
+      };
+    });
 }
 
 export default { createIssue };
