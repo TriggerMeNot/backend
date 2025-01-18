@@ -4,6 +4,7 @@ const envVariables = [
   "PORT",
   "SALT_ROUNDS",
   "JWT_SECRET",
+  "JWT_FORGOT_PASSWORD_SECRET",
   "REDIRECT_URI",
   "GITHUB_ID",
   "GITHUB_SECRET",
@@ -21,6 +22,7 @@ const envVariables = [
   "POSTGRES_USER",
   "POSTGRES_PASSWORD",
   "POSTGRES_DB",
+  "RESEND_API_KEY",
 ];
 
 const missingVariables: string[] = [];
