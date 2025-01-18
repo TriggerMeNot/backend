@@ -14,9 +14,11 @@ const oauths = {
     authenticate_uri: `https://github.com/login/oauth/authorize` +
       `?client_id=${Deno.env.get("GITHUB_ID")}` +
       `&redirect_uri=${Deno.env.get("REDIRECT_URI")}/login/github`,
-    authorization_uri: `https://github.com/apps/${
-      Deno.env.get("GITHUB_APP")
-    }/installations/new`,
+    authorization_uri:
+      `https://github.com/apps/${
+        Deno.env.get("GITHUB_APP")
+      }/installations/new` +
+      `?redirect_uri=${Deno.env.get("REDIRECT_URI")}/services/github`,
   },
 
   "Google": {
