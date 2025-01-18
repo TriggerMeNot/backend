@@ -26,7 +26,15 @@ async function linkDiscord(code: string, redirect_uri_path: string) {
       redirect_uri: Deno.env.get("REDIRECT_URI")! + redirect_uri_path,
     }),
   })
-    .then((res) => res.json())
+    .then((res) => {
+      if (!res.ok) {
+        throw {
+          status: res.status,
+          body: res.statusText,
+        };
+      }
+      return res.json();
+    })
     .catch((err) => {
       throw {
         status: 400,
@@ -42,7 +50,15 @@ async function linkDiscord(code: string, redirect_uri_path: string) {
   } = await fetch(`https://discord.com/api/users/@me`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-    .then((res) => res.json())
+    .then((res) => {
+      if (!res.ok) {
+        throw {
+          status: res.status,
+          body: res.statusText,
+        };
+      }
+      return res.json();
+    })
     .catch((err) => {
       throw {
         status: 400,
@@ -81,7 +97,21 @@ async function discordRefreshToken(
       refresh_token: refreshToken,
     }),
   })
-    .then((res) => res.json());
+    .then((res) => {
+      if (!res.ok) {
+        throw {
+          status: res.status,
+          body: res.statusText,
+        };
+      }
+      return res.json();
+    })
+    .catch((err) => {
+      throw {
+        status: 400,
+        body: err,
+      };
+    });
 
   await db.update(oauthSchema).set({
     token,
@@ -102,56 +132,72 @@ async function discordRefreshToken(
 async function authenticate(ctx: Context) {
   const { code } = ctx.req.valid("json" as never);
 
-  const {
-    discordUserId,
-    username,
-    email,
-    token,
-    tokenExpiresIn,
-    refreshToken,
-    actualTime,
-  } = await linkDiscord(code, "/login/discord");
-
-  // Get the user ID / create a new user if not found
-  const users = await db.select().from(userSchema).where(
-    eq(userSchema.email, email),
-  ).limit(1);
-  const userId = users.length
-    ? users[0].id
-    : await db.insert(userSchema).values({
-      email,
+  return await linkDiscord(code, "/login/discord")
+    .then(async ({
+      discordUserId,
       username,
-      password: null,
-    }).returning()
-      .then((newUser) => newUser[0].id);
-
-  await db.insert(oidcSchema).values({
-    serviceUserId: discordUserId,
-    userId,
-    serviceId: SERVICES.Discord.id!,
-    token,
-    tokenExpiresAt: actualTime + tokenExpiresIn,
-    refreshToken,
-    refreshTokenExpiresAt: actualTime + (365 * 24 * 60 * 60), // 1 year in seconds
-  }).onConflictDoUpdate({
-    target: [oidcSchema.userId, oidcSchema.serviceId],
-    set: {
+      email,
       token,
-      tokenExpiresAt: actualTime + tokenExpiresIn,
+      tokenExpiresIn,
       refreshToken,
-      refreshTokenExpiresAt: actualTime + (365 * 24 * 60 * 60), // 1 year in seconds
-    },
-  });
+      actualTime,
+    }) => {
+      // Get the user ID / create a new user if not found
+      const users = await db
+        .select()
+        .from(userSchema)
+        .where(eq(userSchema.email, email))
+        .limit(1);
+      const userId = users.length ? users[0].id : await db
+        .insert(userSchema)
+        .values({
+          email,
+          username,
+          password: null,
+        })
+        .returning()
+        .then((newUser) => newUser[0].id);
 
-  const payload = {
-    sub: userId,
-    role: "user",
-    exp: actualTime + 60 * 60 * 24, // Token expires in 24 hours
-  };
+      await db
+        .insert(oidcSchema)
+        .values({
+          userId,
+          serviceId: SERVICES.Discord.id!,
+          serviceUserId: discordUserId,
+          token,
+          tokenExpiresAt: actualTime + tokenExpiresIn,
+          refreshToken,
+          refreshTokenExpiresAt: actualTime + (365 * 24 * 60 * 60), // 1 year in seconds
+        })
+        .onConflictDoUpdate({
+          target: [oidcSchema.userId, oidcSchema.serviceId],
+          set: {
+            token,
+            tokenExpiresAt: actualTime + tokenExpiresIn,
+            refreshToken,
+            refreshTokenExpiresAt: actualTime + (365 * 24 * 60 * 60), // 1 year in seconds
+          },
+        });
 
-  const jwtToken = await sign(payload, Deno.env.get("JWT_SECRET")!);
+      const payload = {
+        sub: userId,
+        role: "user",
+        exp: actualTime + 60 * 60 * 24, // Token expires in 24 hours
+      };
 
-  return ctx.json({ message: "Login/Register successful", token: jwtToken });
+      const jwtToken = await sign(payload, Deno.env.get("JWT_SECRET")!);
+
+      return ctx.json({
+        message: "Login/Register successful",
+        token: jwtToken,
+      });
+    })
+    .catch((err) => {
+      return ctx.json(
+        { message: "Login/Register failed", error: err.body },
+        err.status,
+      );
+    });
 }
 
 async function isAuthorized(ctx: Context) {
@@ -175,33 +221,42 @@ async function authorize(ctx: Context) {
   const userId = ctx.get("jwtPayload").sub;
   const { code } = ctx.req.valid("json" as never);
 
-  const {
-    discordUserId,
-    token,
-    tokenExpiresIn,
-    refreshToken,
-    actualTime,
-  } = await linkDiscord(code, "/services/discord");
+  console.log("code", code);
 
-  await db.insert(oauthSchema).values({
-    userId,
-    serviceId: SERVICES.Discord.id!,
-    serviceUserId: discordUserId,
-    token,
-    tokenExpiresAt: actualTime + tokenExpiresIn,
-    refreshToken,
-    refreshTokenExpiresAt: actualTime + (365 * 24 * 60 * 60), // 1 year in seconds
-  }).onConflictDoUpdate({
-    target: [oauthSchema.userId, oauthSchema.serviceId],
-    set: {
+  return await linkDiscord(code, "/services/discord")
+    .then(async ({
+      discordUserId,
       token,
-      tokenExpiresAt: actualTime + tokenExpiresIn,
+      tokenExpiresIn,
       refreshToken,
-      refreshTokenExpiresAt: actualTime + (365 * 24 * 60 * 60), // 1 year in seconds
-    },
-  });
+      actualTime,
+    }) => {
+      await db.insert(oauthSchema).values({
+        userId,
+        serviceId: SERVICES.Discord.id!,
+        serviceUserId: discordUserId,
+        token,
+        tokenExpiresAt: actualTime + tokenExpiresIn,
+        refreshToken,
+        refreshTokenExpiresAt: actualTime + (365 * 24 * 60 * 60), // 1 year in seconds
+      }).onConflictDoUpdate({
+        target: [oauthSchema.userId, oauthSchema.serviceId],
+        set: {
+          token,
+          tokenExpiresAt: actualTime + tokenExpiresIn,
+          refreshToken,
+          refreshTokenExpiresAt: actualTime + (365 * 24 * 60 * 60), // 1 year in seconds
+        },
+      });
 
-  return ctx.json({ message: "Connection successful" });
+      return ctx.json({ message: "Connection successful" });
+    })
+    .catch((err) => {
+      return ctx.json(
+        { message: "Connection failed", error: err.body },
+        err.status,
+      );
+    });
 }
 
 export default {

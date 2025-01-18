@@ -20,7 +20,7 @@ async function sendEmail(reaction: ReactionTrigger) {
   }
   const oauth = oauths[0];
 
-  await fetch(
+  return await fetch(
     "https://graph.microsoft.com/v1.0/me/sendMail",
     {
       method: "POST",
@@ -45,9 +45,22 @@ async function sendEmail(reaction: ReactionTrigger) {
         },
       }),
     },
-  );
-
-  return {};
+  )
+    .then((res) => {
+      if (!res.ok) {
+        throw {
+          status: res.status,
+          body: res.statusText,
+        };
+      }
+      return { success: true };
+    })
+    .catch((err) => {
+      throw {
+        status: 400,
+        body: err,
+      };
+    });
 }
 
 export default { sendEmail };
