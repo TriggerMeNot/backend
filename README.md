@@ -104,11 +104,7 @@ deno install --allow-scripts=npm:bcrypt@5.1.1
 ```
 
 ```bash
-deno -A --env-file=.env.dev npm:drizzle-kit generate
-```
-
-```bash
-deno -A --env-file=.env.dev npm:drizzle-kit migrate
+deno -A --env-file=.env.dev npm:drizzle-kit push
 ```
 
 ```bash
