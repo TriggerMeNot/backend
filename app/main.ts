@@ -23,6 +23,7 @@ const envVariables = [
   "POSTGRES_PASSWORD",
   "POSTGRES_DB",
   "RESEND_API_KEY",
+  "RESEND_DOMAIN",
 ];
 
 const missingVariables: string[] = [];

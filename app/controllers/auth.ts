@@ -91,7 +91,7 @@ async function forgotPassword(ctx: Context) {
   );
 
   return await resend.emails.send({
-    from: "onboarding@resend.dev",
+    from: `noreply@${Deno.env.get("RESEND_DOMAIN")}`,
     to: email,
     subject: "Reset Password",
     html: `<p>Click <a href="${
