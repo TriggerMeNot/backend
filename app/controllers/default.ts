@@ -113,6 +113,7 @@ async function about(ctx: Context) {
   return ctx.json({
     client: {
       host: ctx.req.header("host") || "unknown",
+      redirect_uri: `${Deno.env.get("REDIRECT_URI")}`,
     },
     server: {
       current_time: Math.floor(Date.now() / 1000),
