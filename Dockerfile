@@ -12,6 +12,5 @@ COPY static ./static
 
 RUN deno install --allow-scripts=npm:bcrypt@5.1.1
 
-ENTRYPOINT deno -A npm:drizzle-kit generate && \
-           deno -A npm:drizzle-kit migrate && \
+ENTRYPOINT deno -A npm:drizzle-kit push && \
            deno task start
