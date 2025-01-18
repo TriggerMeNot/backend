@@ -54,4 +54,34 @@ authRouter.post(
   authController.register,
 );
 
+authRouter.post(
+  "/forgot-password",
+  describeRoute({
+    tags: ["auth"],
+    description: "Forgot password",
+    responses: {
+      200: {
+        description: "Successful forgot password response",
+      },
+    },
+  }),
+  validator("json", AuthSchema.ForgotPassword.Body),
+  authController.forgotPassword,
+);
+
+authRouter.post(
+  "/reset-password",
+  describeRoute({
+    tags: ["auth"],
+    description: "Reset password",
+    responses: {
+      200: {
+        description: "Successful reset password response",
+      },
+    },
+  }),
+  validator("json", AuthSchema.ResetPassword.Body),
+  authController.resetPassword,
+);
+
 export default authRouter;

@@ -22,4 +22,17 @@ export default {
       token: z.string(),
     }),
   },
+
+  ForgotPassword: {
+    Body: z.object({
+      email: z.string().email(),
+    }),
+  },
+
+  ResetPassword: {
+    Body: z.object({
+      token: z.string(),
+      password: z.string(),
+    }),
+  },
 };

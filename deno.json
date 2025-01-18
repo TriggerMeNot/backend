@@ -1,7 +1,7 @@
 {
   "tasks": {
     "dev": "deno run --allow-env --env-file=.env.dev --allow-read --allow-net --allow-ffi --watch app/main.ts",
-    "start": "deno run --allow-env --env-file=.env.prod --allow-read --allow-net --allow-ffi app/main.ts",
+    "start": "deno run --allow-env --allow-read --allow-net --allow-ffi app/main.ts",
     "test": "deno test --allow-env --env-file=.env.dev --allow-net --watch",
     "coverage": "deno test  --allow-env --env-file=.env.dev --coverage --clean && deno coverage"
   },
@@ -35,6 +35,7 @@
     "json-schema-to-zod": "npm:json-schema-to-zod@^2.6.0",
     "pg": "npm:pg@^8.13.1",
     "prom-client": "npm:prom-client@^15.1.3",
+    "resend": "npm:resend@^4.1.1",
     "zod": "npm:zod@^3.24.1",
     "zod-openapi": "npm:zod-openapi@^4.2.0",
     "zod-to-json-schema": "npm:zod-to-json-schema@^3.24.1"

@@ -13,10 +13,6 @@ import { actionTrigger } from "../utils/trigger.ts";
 import type { OnNewMessageSettings } from "../interfaces/discord.ts";
 import z from "zod";
 
-if (!Deno.env.has("DISCORD_BOT_TOKEN")) {
-  throw new Error("Environment variable for Discord Bot Token not set");
-}
-
 async function OnNewMessage(
   _ctx: Context,
   actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
@@ -64,14 +60,28 @@ function cronOnNewMessage(
       >;
 
       const response = await fetch(
-        `https://discord.com/api/channels/${settings.channel_id}/messages?limit=1`,
+        `https://discord.com/api/channels/${settings.channelId}/messages?limit=1`,
         {
           headers: {
             Authorization: `Bot ${Deno.env.get("DISCORD_BOT_TOKEN")}`,
           },
         },
       )
-        .then((res) => res.json());
+        .then((res) => {
+          if (!res.ok) {
+            throw {
+              status: res.status,
+              body: res.statusText,
+            };
+          }
+          return res.json();
+        })
+        .catch((err) => {
+          throw {
+            status: 400,
+            body: err,
+          };
+        });
 
       if (response.length > 0) {
         const messageDate = new Date(response[0].timestamp).getTime();

@@ -3,10 +3,10 @@ import { db } from "../db/config.ts";
 import { and, eq } from "drizzle-orm/expressions";
 import { SERVICES } from "../db/seed.ts";
 import { oauths as oauthSchema } from "../schemas/oauths.ts";
-import { SendEmailSettings } from "../interfaces/google.ts";
+import { SendEmailGmailSettings } from "../interfaces/google.ts";
 
 async function sendEmail(reaction: ReactionTrigger) {
-  const settings = SendEmailSettings.parse(reaction.settings);
+  const settings = SendEmailGmailSettings.parse(reaction.settings);
 
   const oauths = await db.select().from(oauthSchema).where(
     and(
@@ -40,7 +40,21 @@ async function sendEmail(reaction: ReactionTrigger) {
       }),
     },
   )
-    .then((res) => res.json());
+    .then((res) => {
+      if (!res.ok) {
+        throw {
+          status: res.status,
+          body: res.statusText,
+        };
+      }
+      return res.json();
+    })
+    .catch((err) => {
+      throw {
+        status: 400,
+        body: err,
+      };
+    });
 }
 
 export default { sendEmail };
