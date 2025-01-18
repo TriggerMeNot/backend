@@ -27,7 +27,15 @@ async function linkGithub(code: string) {
       code,
     }),
   })
-    .then((res) => res.json())
+    .then((res) => {
+      if (!res.ok) {
+        throw {
+          status: res.status,
+          body: res.statusText,
+        };
+      }
+      return res.json();
+    })
     .catch((err) => {
       throw {
         status: 400,
@@ -42,7 +50,15 @@ async function linkGithub(code: string) {
   } = await fetch(`https://api.github.com/user`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-    .then((res) => res.json())
+    .then((res) => {
+      if (!res.ok) {
+        throw {
+          status: res.status,
+          body: res.statusText,
+        };
+      }
+      return res.json();
+    })
     .catch((err) => {
       throw {
         status: 400,
@@ -54,7 +70,15 @@ async function linkGithub(code: string) {
   const email = await fetch(`https://api.github.com/user/emails`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-    .then((res) => res.json())
+    .then((res) => {
+      if (!res.ok) {
+        throw {
+          status: res.status,
+          body: res.statusText,
+        };
+      }
+      return res.json();
+    })
     .then((data) => {
       return data.find((e: { primary: boolean }) => e.primary)?.email;
     })
@@ -80,57 +104,73 @@ async function linkGithub(code: string) {
 async function authenticate(ctx: Context) {
   const { code } = ctx.req.valid("json" as never);
 
-  const {
-    githubUserId,
-    username,
-    email,
-    token,
-    tokenExpiresIn,
-    refreshToken,
-    refreshTokenExpiresIn,
-    actualTime,
-  } = await linkGithub(code);
-
-  // Get the user ID / create a new user if not found
-  const users = await db.select().from(userSchema).where(
-    eq(userSchema.email, email),
-  ).limit(1);
-  const userId = users.length
-    ? users[0].id
-    : await db.insert(userSchema).values({
-      email,
+  return await linkGithub(code)
+    .then(async ({
+      githubUserId,
       username,
-      password: null,
-    }).returning()
-      .then((newUser) => newUser[0].id);
-
-  await db.insert(oidcSchema).values({
-    serviceUserId: githubUserId,
-    userId,
-    serviceId: SERVICES.GitHub.id!,
-    token,
-    tokenExpiresAt: actualTime + tokenExpiresIn,
-    refreshToken,
-    refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
-  }).onConflictDoUpdate({
-    target: [oidcSchema.userId, oidcSchema.serviceId],
-    set: {
+      email,
       token,
-      tokenExpiresAt: actualTime + tokenExpiresIn,
+      tokenExpiresIn,
       refreshToken,
-      refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
-    },
-  });
+      refreshTokenExpiresIn,
+      actualTime,
+    }) => {
+      // Get the user ID / create a new user if not found
+      const users = await db
+        .select()
+        .from(userSchema)
+        .where(eq(userSchema.email, email))
+        .limit(1);
+      const userId = users.length ? users[0].id : await db
+        .insert(userSchema)
+        .values({
+          email,
+          username,
+          password: null,
+        })
+        .returning()
+        .then((newUser) => newUser[0].id);
 
-  const payload = {
-    sub: userId,
-    role: "user",
-    exp: actualTime + 60 * 60 * 24, // Token expires in 24 hours
-  };
+      await db
+        .insert(oidcSchema)
+        .values({
+          serviceUserId: githubUserId,
+          userId,
+          serviceId: SERVICES.GitHub.id!,
+          token,
+          tokenExpiresAt: actualTime + tokenExpiresIn,
+          refreshToken,
+          refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
+        })
+        .onConflictDoUpdate({
+          target: [oidcSchema.userId, oidcSchema.serviceId],
+          set: {
+            token,
+            tokenExpiresAt: actualTime + tokenExpiresIn,
+            refreshToken,
+            refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
+          },
+        });
 
-  const jwtToken = await sign(payload, Deno.env.get("JWT_SECRET")!);
+      const payload = {
+        sub: userId,
+        role: "user",
+        exp: actualTime + 60 * 60 * 24, // Token expires in 24 hours
+      };
 
-  return ctx.json({ message: "Login/Register successful", token: jwtToken });
+      const jwtToken = await sign(payload, Deno.env.get("JWT_SECRET")!);
+
+      return ctx.json({
+        message: "Login/Register successful",
+        token: jwtToken,
+      });
+    })
+    .catch((err) => {
+      return ctx.json(
+        { message: "Login/Register failed", error: err.body },
+        err.status,
+      );
+    });
 }
 
 async function isAuthorized(ctx: Context) {
@@ -154,34 +194,41 @@ async function authorize(ctx: Context) {
   const userId = ctx.get("jwtPayload").sub;
   const { code } = ctx.req.valid("json" as never);
 
-  const {
-    githubUserId,
-    token,
-    tokenExpiresIn,
-    refreshToken,
-    refreshTokenExpiresIn,
-    actualTime,
-  } = await linkGithub(code);
-
-  await db.insert(oauthSchema).values({
-    userId,
-    serviceId: SERVICES.GitHub.id!,
-    serviceUserId: githubUserId,
-    token,
-    tokenExpiresAt: actualTime + tokenExpiresIn,
-    refreshToken,
-    refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
-  }).onConflictDoUpdate({
-    target: [oauthSchema.userId, oauthSchema.serviceId],
-    set: {
+  return await linkGithub(code)
+    .then(async ({
+      githubUserId,
       token,
-      tokenExpiresAt: actualTime + tokenExpiresIn,
+      tokenExpiresIn,
       refreshToken,
-      refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
-    },
-  });
+      refreshTokenExpiresIn,
+      actualTime,
+    }) => {
+      await db.insert(oauthSchema).values({
+        userId,
+        serviceId: SERVICES.GitHub.id!,
+        serviceUserId: githubUserId,
+        token,
+        tokenExpiresAt: actualTime + tokenExpiresIn,
+        refreshToken,
+        refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
+      }).onConflictDoUpdate({
+        target: [oauthSchema.userId, oauthSchema.serviceId],
+        set: {
+          token,
+          tokenExpiresAt: actualTime + tokenExpiresIn,
+          refreshToken,
+          refreshTokenExpiresAt: actualTime + refreshTokenExpiresIn,
+        },
+      });
 
-  return ctx.json({ message: "Connection successful" });
+      return ctx.json({ message: "Connection successful" });
+    })
+    .catch((err) => {
+      return ctx.json(
+        { message: "Connection failed", error: err.body },
+        err.status,
+      );
+    });
 }
 
 async function webhook(ctx: Context) {

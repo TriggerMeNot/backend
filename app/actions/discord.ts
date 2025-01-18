@@ -67,7 +67,21 @@ function cronOnNewMessage(
           },
         },
       )
-        .then((res) => res.json());
+        .then((res) => {
+          if (!res.ok) {
+            throw {
+              status: res.status,
+              body: res.statusText,
+            };
+          }
+          return res.json();
+        })
+        .catch((err) => {
+          throw {
+            status: 400,
+            body: err,
+          };
+        });
 
       if (response.length > 0) {
         const messageDate = new Date(response[0].timestamp).getTime();

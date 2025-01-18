@@ -37,9 +37,18 @@ async function sendMessage(reaction: ReactionTrigger) {
   )
     .then((res) => {
       if (!res.ok) {
-        throw new Error("Failed to send message");
+        throw {
+          status: res.status,
+          body: res.statusText,
+        };
       }
       return res.json();
+    })
+    .catch((err) => {
+      throw {
+        status: 400,
+        body: err,
+      };
     });
 }
 
@@ -73,9 +82,18 @@ async function sendTTSMessage(reaction: ReactionTrigger) {
   )
     .then((res) => {
       if (!res.ok) {
-        throw new Error("Failed to send message");
+        throw {
+          status: res.status,
+          body: res.statusText,
+        };
       }
       return res.json();
+    })
+    .catch((err) => {
+      throw {
+        status: 400,
+        body: err,
+      };
     });
 }
 

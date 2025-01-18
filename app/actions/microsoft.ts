@@ -63,7 +63,21 @@ function cronOnNewEmail(
           headers: { Authorization: `Bearer ${accessToken}` },
         },
       )
-        .then((res) => res.json());
+        .then((res) => {
+          if (!res.ok) {
+            throw {
+              status: res.status,
+              body: res.statusText,
+            };
+          }
+          return res.json();
+        })
+        .catch((err) => {
+          throw {
+            status: 400,
+            body: err,
+          };
+        });
 
       if (response.value.length > 0) {
         actionTrigger(cron.actionPlaygroundId, {});
