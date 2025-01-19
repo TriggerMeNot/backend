@@ -25,4 +25,14 @@ const SendEmailOutlookSettings = z.object({
   body: z.string(),
 });
 
-export { OnNewEmailOutlookSettings, SendEmailOutlookSettings };
+const OnNewEmailUserOutlookSettings = z.object({
+  cron: z.string(),
+  user: z.string(),
+});
+
+const OnNewEmailTitleOutlookSettings = z.object({
+  cron: z.string(),
+  title: z.string(),
+});
+
+export { OnNewEmailOutlookSettings, SendEmailOutlookSettings, OnNewEmailUserOutlookSettings, OnNewEmailTitleOutlookSettings };

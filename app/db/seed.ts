@@ -14,6 +14,8 @@ import {
 import {
   OnNewEmailOutlookSettings,
   SendEmailOutlookSettings,
+  OnNewEmailUserOutlookSettings,
+  OnNewEmailTitleOutlookSettings,
 } from "../interfaces/microsoft.ts";
 import {
   OnNewMessageSettings,
@@ -117,6 +119,16 @@ const SERVICES: Record<string, Service> = {
         description:
           "Check at each time of the interval if there is a unread email in the inbox",
         settings: zodToJsonSchema(OnNewEmailOutlookSettings),
+      },
+      "On Email From User (Outlook)": {
+        description:
+          "Check at each time of the interval if there is a unread email in the inbox from a specific user",
+        settings: zodToJsonSchema(OnNewEmailUserOutlookSettings),
+      },
+      "On Email With Title (Outlook)": {
+        description:
+          "Check at each time of the interval if there is a unread email in the inbox with a specific title",
+        settings: zodToJsonSchema(OnNewEmailTitleOutlookSettings),
       },
     },
     reactions: {
