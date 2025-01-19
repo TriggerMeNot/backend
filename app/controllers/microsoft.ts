@@ -28,7 +28,7 @@ async function linkMicrosoft(code: string, redirect_uri_path: string) {
         code,
         grant_type: "authorization_code",
         redirect_uri: Deno.env.get("REDIRECT_URI")! + redirect_uri_path,
-        scope: Deno.env.get("MICROSOFT_SCOPE")!,
+        scope: "email profile openid offline_access https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/User.Read",
       }),
     },
   )
@@ -104,7 +104,8 @@ async function microsoftRefreshToken(
         client_id: Deno.env.get("MICROSOFT_ID")!,
         client_secret: Deno.env.get("MICROSOFT_SECRET")!,
         grant_type: "refresh_token",
-        scope: Deno.env.get("MICROSOFT_SCOPE")!,
+        scope:
+          "email profile openid offline_access https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/User.Read",
         refresh_token: refreshToken,
       }),
     },

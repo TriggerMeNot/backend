@@ -47,7 +47,7 @@ const oauths = {
       `response_type=code&` +
       `redirect_uri=${Deno.env.get("REDIRECT_URI")}/login/microsoft&` +
       `response_mode=query&` +
-      `scope=${Deno.env.get("MICROSOFT_SCOPE")}&` +
+      `scope=email profile openid offline_access https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/User.Read&` +
       `state=12345&` +
       `sso_reload=true`,
     authorization_uri:
@@ -58,7 +58,7 @@ const oauths = {
       `&response_type=code` +
       `&redirect_uri=${Deno.env.get("REDIRECT_URI")}/services/microsoft` +
       `&response_mode=query` +
-      `&scope=${Deno.env.get("MICROSOFT_SCOPE")}` +
+      `&scope=email profile openid offline_access https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/User.Read` +
       `&state=12345` +
       `&sso_reload=true`,
   },
