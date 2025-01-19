@@ -133,69 +133,115 @@ Documentation.
 ```mermaid
 erDiagram
 
-Users {
-    int id
-    string name
-    string email
-    string password
-    string role
-    string createdAt
-    string updatedAt
+oauths {
+    serial id PK
+    integer user_id
+    integer service_id
+    text service_user_id
+    text token
+    integer token_expires_at
+    text refresh_token
+    integer refresh_token_expires_at
 }
 
-Services {
-    int id
-    string name
+playgrounds {
+    serial id PK
+    text name
+    integer user_id
 }
 
-OAuths {
-    int id
-    int userId
-    int serviceId
-    string accessToken
-    string refreshToken
+reactionLinks {
+    serial id PK
+    integer trigger_id
+    integer reaction_id
 }
-OAuths |o--|| Users : owner
-OAuths |o--|| Services : provider
 
-Reactions {
-    int id
-    int serviceId
-    string name
+actions {
+    serial id PK
+    integer service_id
+    text name
+    text description
+    jsonb settings
+    jsonb params
 }
-Reactions |o--|| Services : use
 
-Actions {
-    int id
-    int serviceId
-    string name
-    string description
+reactionsPlayground {
+    serial id PK
+    integer playground_id
+    integer reaction_id
+    jsonb settings
+    integer x
+    integer y
 }
-Actions |o--|| Services : use
 
-Playgrounds {
-    int id
-    int userId
-    string createdAt
-    string updatedAt
+oidcs {
+    serial id PK
+    integer user_id
+    integer service_id
+    text service_user_id
+    text token
+    integer token_expires_at
+    text refresh_token
+    integer refresh_token_expires_at
 }
-Playgrounds |o--|| Users : owner
 
-PlaygroundsReactions {
-    int id
-    int playgroundId
-    int reactionId
-    string settings
+users {
+    serial id PK
+    text email
+    text username
+    text password
 }
-PlaygroundsReactions |o--|| Playgrounds : reactions
-PlaygroundsReactions |o--|| Reactions : use
 
-PlaygroundsActions {
-    int id
-    int playgroundId
-    int actionId
-    string settings
+services {
+    serial id PK
+    text name
+    text description
 }
-PlaygroundsActions |o--|| Playgrounds : actions
-PlaygroundsActions |o--|| Actions : use
+
+actionsPlayground {
+    serial id PK
+    integer playground_id
+    integer action_id
+    jsonb settings
+    jsonb params
+    integer x
+    integer y
+}
+
+actionLinks {
+    serial id PK
+    integer trigger_id
+    integer reaction_id
+}
+
+crons {
+    serial id PK
+    integer action_playground_id
+    text cron
+}
+
+reactions {
+    serial id PK
+    integer service_id
+    text name
+    text description
+    jsonb settings
+}
+
+oauths ||--o{ users : "user_id"
+oauths ||--o{ services : "service_id"
+playgrounds ||--o{ users : "user_id"
+reactionLinks ||--o{ reactionsPlayground : "trigger_id"
+reactionLinks ||--o{ reactionsPlayground : "reaction_id"
+actions ||--o{ services : "service_id"
+reactionsPlayground ||--o{ playgrounds : "playground_id"
+reactionsPlayground ||--o{ reactions : "reaction_id"
+oidcs ||--o{ users : "user_id"
+oidcs ||--o{ services : "service_id"
+actionsPlayground ||--o{ playgrounds : "playground_id"
+actionsPlayground ||--o{ actions : "action_id"
+actionLinks ||--o{ actionsPlayground : "trigger_id"
+actionLinks ||--o{ reactionsPlayground : "reaction_id"
+crons ||--o{ actionsPlayground : "action_playground_id"
+reactions ||--o{ services : "service_id"
 ```
