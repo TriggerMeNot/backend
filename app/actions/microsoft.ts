@@ -91,4 +91,162 @@ function cronOnNewEmail(
   scheduler.registerTask(parseCronExpression(cron.cron), task);
 }
 
-export default { OnNewEmail, cronOnNewEmail };
+async function OnEmailFromUser(
+  _ctx: Context,
+  actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
+  _playgroundId: number,
+) {
+  const cron = await db.insert(cronSchema).values({
+    actionPlaygroundId: actionPlayground.id,
+    cron: (actionPlayground.settings as { cron: string }).cron,
+  }).returning();
+
+  cronOnEmailFromUser(cron[0]);
+}
+
+async function OnEmailWithTitle(
+  _ctx: Context,
+  actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
+  _playgroundId: number,
+) {
+  const cron = await db.insert(cronSchema).values({
+    actionPlaygroundId: actionPlayground.id,
+    cron: (actionPlayground.settings as { cron: string }).cron,
+  }).returning();
+
+  cronOnEmailWithTitle(cron[0]);
+}
+
+function cronOnEmailFromUser(
+  cron: typeof cronSchema.$inferSelect,
+) {
+  async function task() {
+    try {
+      const data = await db.select().from(actionPlaygroundSchema).where(
+        eq(actionPlaygroundSchema.id, cron.actionPlaygroundId),
+      ).innerJoin(
+        playgroundSchema,
+        eq(playgroundSchema.id, actionPlaygroundSchema.playgroundId),
+      ).innerJoin(
+        userSchema,
+        eq(userSchema.id, playgroundSchema.userId),
+      ).innerJoin(
+        oauthSchema,
+        and(
+          eq(oauthSchema.userId, userSchema.id),
+          eq(oauthSchema.serviceId, SERVICES.Microsoft.id!),
+        ),
+      ).limit(1);
+
+      if (data.length === 0) {
+        return;
+      }
+
+      const accessToken = (data[0].oauths.tokenExpiresAt < Date.now())
+        ? await microsoftController.microsoftRefreshToken(
+          data[0].users.id,
+          data[0].oauths.refreshToken,
+        )
+        : data[0].oauths.token;
+
+      const response = await fetch(
+        `https://graph.microsoft.com/v1.0/me/mailFolders('Inbox')/messages?$filter=from/emailAddress/address eq '${(data[0].actionsPlayground.settings as { userEmail : string }).userEmail}' and isRead eq false`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      )
+        .then((res) => {
+          if (!res.ok) {
+            throw {
+              status: res.status,
+              body: res.statusText,
+            };
+          }
+          return res.json();
+        })
+        .catch((err) => {
+          throw {
+            status: 400,
+            body: err,
+          };
+        });
+
+      if (response.value.length > 0) {
+        actionTrigger(cron.actionPlaygroundId, {});
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+      return;
+    }
+  }
+
+  scheduler.registerTask(parseCronExpression(cron.cron), task);
+}
+
+function cronOnEmailWithTitle(
+  cron: typeof cronSchema.$inferSelect,
+) {
+  async function task() {
+    try {
+      const data = await db.select().from(actionPlaygroundSchema).where(
+        eq(actionPlaygroundSchema.id, cron.actionPlaygroundId),
+      ).innerJoin(
+        playgroundSchema,
+        eq(playgroundSchema.id, actionPlaygroundSchema.playgroundId),
+      ).innerJoin(
+        userSchema,
+        eq(userSchema.id, playgroundSchema.userId),
+      ).innerJoin(
+        oauthSchema,
+        and(
+          eq(oauthSchema.userId, userSchema.id),
+          eq(oauthSchema.serviceId, SERVICES.Microsoft.id!),
+        ),
+      ).limit(1);
+
+      if (data.length === 0) {
+        return;
+      }
+
+      const accessToken = (data[0].oauths.tokenExpiresAt < Date.now())
+        ? await microsoftController.microsoftRefreshToken(
+          data[0].users.id,
+          data[0].oauths.refreshToken,
+        )
+        : data[0].oauths.token;
+
+      const response = await fetch(
+        `https://graph.microsoft.com/v1.0/me/mailFolders('Inbox')/messages?$filter=subject eq '${(data[0].actionsPlayground.settings as { title: string }).title}' and isRead eq false`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      )
+        .then((res) => {
+          if (!res.ok) {
+            throw {
+              status: res.status,
+              body: res.statusText,
+            };
+          }
+          return res.json();
+        })
+        .catch((err) => {
+          throw {
+            status: 400,
+            body: err,
+          };
+        });
+
+      if (response.value.length > 0) {
+        actionTrigger(cron.actionPlaygroundId, {});
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+      return;
+    }
+  }
+
+  scheduler.registerTask(parseCronExpression(cron.cron), task);
+}
+
+export default { OnNewEmail, cronOnNewEmail, OnEmailFromUser, cronOnEmailFromUser, OnEmailWithTitle, cronOnEmailWithTitle };
