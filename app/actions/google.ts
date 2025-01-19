@@ -249,4 +249,295 @@ function cronOnEmailWithTitle(
   scheduler.registerTask(parseCronExpression(cron.cron), task);
 }
 
-export default { OnNewEmail, cronOnNewEmail, OnEmailFromUser, cronOnEmailFromUser, OnEmailWithTitle, cronOnEmailWithTitle };
+async function OnNewMessageGroupSettings(
+  _ctx: Context,
+  actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
+  _playgroundId: number,
+) {
+  const cron = await db.insert(cronSchema).values({
+    actionPlaygroundId: actionPlayground.id,
+    cron: (actionPlayground.settings as { cron: string }).cron,
+  }).returning();
+
+  cronOnNewMessageGroup(cron[0], actionPlayground);
+}
+
+function cronOnNewMessageGroup(
+  cron: typeof cronSchema.$inferSelect,
+  actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
+) {
+  async function task() {
+    try {
+      const data = await db.select().from(actionPlaygroundSchema).where(
+        eq(actionPlaygroundSchema.id, actionPlaygroundSchema.playgroundId),
+      ).innerJoin(
+        userSchema,
+        eq(userSchema.id, playgroundSchema.userId),
+      ).innerJoin(
+        oauthSchema,
+        and(
+          eq(oauthSchema.userId, userSchema.id),
+          eq(oauthSchema.serviceId, SERVICES.Google.id!),
+        ),
+      ).limit(1);
+
+      if (data.length === 0) {
+        return;
+      }
+
+      const accessToken = (data[0].oauths.tokenExpiresAt < Date.now())
+        ? await googleController.googleRefreshToken(
+          data[0].users.id,
+          data[0].oauths.refreshToken,
+        )
+        : data[0].oauths.token;
+
+      const response = await fetch(
+        `https://groups.google.com/forum/#!forum/${(actionPlayground.settings as { groupId: string }).groupId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      const messages = await response.json() as {
+        resultSizeEstimate: number;
+        messages?: Array<{
+          id: string;
+          threadId: string;
+        }>;
+      };
+
+      if (messages.resultSizeEstimate > 0) {
+        actionTrigger(cron.actionPlaygroundId, {});
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+      return;
+    }
+  }
+
+  scheduler.registerTask(parseCronExpression(cron.cron), task);
+}
+
+async function OnNewMessageHashtag(
+  _ctx: Context,
+  actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
+  _playgroundId: number,
+) {
+  const cron = await db.insert(cronSchema).values({
+    actionPlaygroundId: actionPlayground.id,
+    cron: (actionPlayground.settings as { cron: string }).cron,
+  }).returning();
+
+  cronOnNewMessageHashtag(cron[0], actionPlayground);
+}
+
+function cronOnNewMessageHashtag(
+  cron: typeof cronSchema.$inferSelect,
+  actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
+) {
+  async function task() {
+    try {
+      const data = await db.select().from(actionPlaygroundSchema).where(
+        eq(actionPlaygroundSchema.id, cron.actionPlaygroundId),
+      ).innerJoin(
+        playgroundSchema,
+        eq(playgroundSchema.id, actionPlaygroundSchema.playgroundId),
+      ).innerJoin(
+        userSchema,
+        eq(userSchema.id, playgroundSchema.userId),
+      ).innerJoin(
+        oauthSchema,
+        and(
+          eq(oauthSchema.userId, userSchema.id),
+          eq(oauthSchema.serviceId, SERVICES.Google.id!),
+        ),
+      ).limit(1);
+
+      if (data.length === 0) {
+        return;
+      }
+
+      const accessToken = (data[0].oauths.tokenExpiresAt < Date.now())
+        ? await googleController.googleRefreshToken(
+          data[0].users.id,
+          data[0].oauths.refreshToken,
+        )
+        : data[0].oauths.token;
+
+      const response = await fetch(
+        `https://groups.google.com/forum/#!forum/${(actionPlayground.settings as { hashtag: string }).hashtag}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      const messages = await response.json() as {
+        resultSizeEstimate: number;
+        messages?: Array<{
+          id: string;
+          threadId: string;
+        }>;
+      };
+
+      if (messages.resultSizeEstimate > 0) {
+        actionTrigger(cron.actionPlaygroundId, {});
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+      return;
+    }
+  }
+
+  scheduler.registerTask(parseCronExpression(cron.cron), task);
+}
+
+async function OnNewPrivateMessage(
+  _ctx: Context,
+  actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
+  _playgroundId: number,
+) {
+  const cron = await db.insert(cronSchema).values({
+    actionPlaygroundId: actionPlayground.id,
+    cron: (actionPlayground.settings as { cron: string }).cron,
+  }).returning();
+
+  cronOnNewPrivateMessage(cron[0]);
+}
+
+function cronOnNewPrivateMessage(
+  cron: typeof cronSchema.$inferSelect,
+) {
+  async function task() {
+    try {
+      const data = await db.select().from(actionPlaygroundSchema).where(
+        eq(actionPlaygroundSchema.id, cron.actionPlaygroundId),
+      ).innerJoin(
+        playgroundSchema,
+        eq(playgroundSchema.id, actionPlaygroundSchema.playgroundId),
+      ).innerJoin(
+        userSchema,
+        eq(userSchema.id, playgroundSchema.userId),
+      ).innerJoin(
+        oauthSchema,
+        and(
+          eq(oauthSchema.userId, userSchema.id),
+          eq(oauthSchema.serviceId, SERVICES.Google.id!),
+        ),
+      ).limit(1);
+
+      if (data.length === 0) {
+        return;
+      }
+
+      const accessToken = (data[0].oauths.tokenExpiresAt < Date.now())
+        ? await googleController.googleRefreshToken(
+          data[0].users.id,
+          data[0].oauths.refreshToken,
+        )
+        : data[0].oauths.token;
+
+      const response = await fetch(
+        `https://gmail.googleapis.com/gmail/v1/users/${data[0].oauths.serviceUserId}/messages?q=is:unread is:private`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      const messages = await response.json() as {
+        resultSizeEstimate: number;
+        messages?: Array<{
+          id: string;
+          threadId: string;
+        }>;
+      };
+
+      if (messages.resultSizeEstimate > 0) {
+        actionTrigger(cron.actionPlaygroundId, {});
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+      return;
+    }
+  }
+
+  scheduler.registerTask(parseCronExpression(cron.cron), task);
+}
+
+async function OnMessageLike(
+  _ctx: Context,
+  actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
+  _playgroundId: number,
+) {
+  const cron = await db.insert(cronSchema).values({
+    actionPlaygroundId: actionPlayground.id,
+    cron: (actionPlayground.settings as { cron: string }).cron,
+  }).returning();
+
+  cronOnMessageLike(cron[0]);
+}
+
+function cronOnMessageLike(
+  cron: typeof cronSchema.$inferSelect,
+) {
+  async function task() {
+    try {
+      const data = await db.select().from(actionPlaygroundSchema).where(
+        eq(actionPlaygroundSchema.id, cron.actionPlaygroundId),
+      ).innerJoin(
+        playgroundSchema,
+        eq(playgroundSchema.id, actionPlaygroundSchema.playgroundId),
+      ).innerJoin(
+        userSchema,
+        eq(userSchema.id, playgroundSchema.userId),
+      ).innerJoin(
+        oauthSchema,
+        and(
+          eq(oauthSchema.userId, userSchema.id),
+          eq(oauthSchema.serviceId, SERVICES.Google.id!),
+        ),
+      ).limit(1);
+
+      if (data.length === 0) {
+        return;
+      }
+
+      const accessToken = (data[0].oauths.tokenExpiresAt < Date.now())
+        ? await googleController.googleRefreshToken(
+          data[0].users.id,
+          data[0].oauths.refreshToken,
+        )
+        : data[0].oauths.token;
+
+      const response = await fetch(
+        `https://gmail.googleapis.com/gmail/v1/users/${data[0].oauths.serviceUserId}/messages?q=is:unread is:liked`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      const messages = await response.json() as {
+        resultSizeEstimate: number;
+        messages?: Array<{
+          id: string;
+          threadId: string;
+        }>;
+      };
+
+      if (messages.resultSizeEstimate > 0) {
+        actionTrigger(cron.actionPlaygroundId, {});
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+      return;
+    }
+  }
+
+  scheduler.registerTask(parseCronExpression(cron.cron), task);
+}
+
+export default { OnNewEmail, cronOnNewEmail, OnEmailFromUser, cronOnEmailFromUser, OnEmailWithTitle, cronOnEmailWithTitle, OnNewMessageGroupSettings, cronOnNewMessageGroup, OnNewMessageHashtag, cronOnNewMessageHashtag, OnNewPrivateMessage, cronOnNewPrivateMessage, OnMessageLike, cronOnMessageLike };

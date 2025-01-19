@@ -35,4 +35,22 @@ const OnEmailWithTitleSettings = z.object({
   subject: z.string(),
 });
 
-export { OnNewEmailGmailSettings, SendEmailGmailSettings, OnEmailFromUserSettings, OnEmailWithTitleSettings };
+const OnNewMessageGroupSettings = z.object({
+  cron: z.string(),
+  groupId: z.string(),
+});
+
+const OnNewMessageHashtagSettings = z.object({
+  cron: z.string(),
+  hashtag: z.string(),
+});
+
+const OnNewPrivateMessageSettings = z.object({
+  cron: z.string(),
+});
+
+const OnMessageLikeSettings = z.object({
+  cron: z.string(),
+});
+
+export { OnNewEmailGmailSettings, SendEmailGmailSettings, OnEmailFromUserSettings, OnEmailWithTitleSettings, OnNewMessageGroupSettings, OnNewMessageHashtagSettings, OnNewPrivateMessageSettings, OnMessageLikeSettings };
