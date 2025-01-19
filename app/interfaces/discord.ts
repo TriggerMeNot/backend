@@ -30,4 +30,19 @@ const SendTTSMessageSettings = z.object({
   message: z.string(),
 });
 
-export { OnNewMessageSettings, SendMessageSettings, SendTTSMessageSettings };
+const OnNewMentionSettings = z.object({
+  channelId: z.string(),
+  cron: z.string(),
+});
+
+const OnMessageReactionSettings = z.object({
+  channelId: z.string(),
+  cron: z.string(),
+});
+
+const OnUserJoinSettings = z.object({
+  channelId: z.string(),
+  cron: z.string(),
+});
+
+export { OnNewMessageSettings, SendMessageSettings, SendTTSMessageSettings, OnNewMentionSettings, OnMessageReactionSettings, OnUserJoinSettings };

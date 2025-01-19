@@ -10,7 +10,7 @@ import { scheduler } from "./actions.ts";
 import { parseCronExpression } from "cron-schedule";
 import { SERVICES } from "../db/seed.ts";
 import { actionTrigger } from "../utils/trigger.ts";
-import type { OnNewMessageSettings } from "../interfaces/discord.ts";
+import type { OnNewMentionSettings, OnNewMessageSettings, OnMessageReactionSettings, OnUserJoinSettings } from "../interfaces/discord.ts";
 import z from "zod";
 
 async function OnNewMessage(
@@ -100,4 +100,243 @@ function cronOnNewMessage(
   scheduler.registerTask(parseCronExpression(cron.cron), task);
 }
 
-export default { OnNewMessage, cronOnNewMessage };
+async function OnNewMention(
+  _ctx: Context,
+  actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
+  _playgroundId: number,
+) {
+  const settings = actionPlayground.settings as z.infer<typeof OnNewMentionSettings>;
+
+  const cron = await db.insert(cronSchema).values({
+    actionPlaygroundId: actionPlayground.id,
+    cron: settings.cron,
+  }).returning();
+
+  cronOnNewMention(cron[0]);
+}
+
+function cronOnNewMention(
+  cron: typeof cronSchema.$inferSelect,
+) {
+  async function task() {
+    try {
+      const data = await db.select().from(actionPlaygroundSchema).where(
+        eq(actionPlaygroundSchema.id, cron.actionPlaygroundId),
+      ).innerJoin(
+        playgroundSchema,
+        eq(playgroundSchema.id, actionPlaygroundSchema.playgroundId),
+      ).innerJoin(
+        userSchema,
+        eq(userSchema.id, playgroundSchema.userId),
+      ).innerJoin(
+        oauthSchema,
+        and(
+          eq(oauthSchema.userId, userSchema.id),
+          eq(oauthSchema.serviceId, SERVICES.Discord.id!),
+        ),
+      ).limit(1);
+
+      if (data.length === 0) {
+        return;
+      }
+
+      const settings = data[0].actionsPlayground.settings as z.infer<typeof OnNewMentionSettings>;
+
+      const response = await fetch(
+        `https://discord.com/api/channels/${settings.channelId}/messages?limit=1`,
+        {
+          headers: {
+            Authorization: `Bot ${Deno.env.get("DISCORD_BOT_TOKEN")}`,
+          },
+        },
+      )
+        .then((res) => {
+          if (!res.ok) {
+            throw {
+              status: res.status,
+              body: res.statusText,
+            };
+          }
+          return res.json();
+        })
+        .catch((err) => {
+          throw {
+            status: 400,
+            body: err,
+          };
+        });
+
+      if (response.length > 0) {
+        const message = response[0];
+        if (message.mentions.length > 0) {
+          actionTrigger(cron.actionPlaygroundId, {});
+        }
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+      return;
+    }
+  }
+
+  scheduler.registerTask(parseCronExpression(cron.cron), task);
+}
+
+async function OnMessageReaction(
+  _ctx: Context,
+  actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
+  _playgroundId: number,
+) {
+  const settings = actionPlayground.settings as z.infer<typeof OnMessageReactionSettings>;
+
+  const cron = await db.insert(cronSchema).values({
+    actionPlaygroundId: actionPlayground.id,
+    cron: settings.cron,
+  }).returning();
+
+  cronOnMessageReaction(cron[0]);
+}
+
+function cronOnMessageReaction(
+  cron: typeof cronSchema.$inferSelect,
+) {
+  async function task() {
+    try {
+      const data = await db.select().from(actionPlaygroundSchema).where(
+        eq(actionPlaygroundSchema.id, cron.actionPlaygroundId),
+      ).innerJoin(
+        playgroundSchema,
+        eq(playgroundSchema.id, actionPlaygroundSchema.playgroundId),
+      ).innerJoin(
+        userSchema,
+        eq(userSchema.id, playgroundSchema.userId),
+      ).innerJoin(
+        oauthSchema,
+        and(
+          eq(oauthSchema.userId, userSchema.id),
+          eq(oauthSchema.serviceId, SERVICES.Discord.id!),
+        ),
+      ).limit(1);
+
+      if (data.length === 0) {
+        return;
+      }
+
+      const settings = data[0].actionsPlayground.settings as z.infer<typeof OnMessageReactionSettings>;
+
+      const response = await fetch(
+        `https://discord.com/api/channels/${settings.channelId}/messages?limit=1`,
+        {
+          headers: {
+            Authorization: `Bot ${Deno.env.get("DISCORD_BOT_TOKEN")}`,
+          },
+        },
+      )
+        .then((res) => {
+          if (!res.ok) {
+            throw {
+              status: res.status,
+              body: res.statusText,
+            };
+          }
+          return res.json();
+        })
+        .catch((err) => {
+          throw {
+            status: 400,
+            body: err,
+          };
+        });
+
+      if (response.length > 0) {
+        const message = response[0];
+        if (message.reactions.length > 0) {
+          actionTrigger(cron.actionPlaygroundId, {});
+        }
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+      return;
+    }
+  }
+
+  scheduler.registerTask(parseCronExpression(cron.cron), task);
+}
+
+async function OnUserJoin(
+  _ctx: Context,
+  actionPlayground: typeof actionPlaygroundSchema.$inferSelect,
+  _playgroundId: number,
+) {
+  const settings = actionPlayground.settings as z.infer<typeof OnUserJoinSettings>;
+
+  const cron = await db.insert(cronSchema).values({
+    actionPlaygroundId: actionPlayground.id,
+    cron: settings.cron,
+  }).returning();
+
+  cronOnUserJoin(cron[0]);
+}
+
+function cronOnUserJoin(
+  cron: typeof cronSchema.$inferSelect,
+) {
+  async function task() {
+    try {
+      const data = await db.select().from(actionPlaygroundSchema).where(
+        eq(actionPlaygroundSchema.id, cron.actionPlaygroundId),
+      ).innerJoin(
+        playgroundSchema,
+        eq(playgroundSchema.id, actionPlaygroundSchema.playgroundId),
+      ).innerJoin(
+        userSchema,
+        eq(userSchema.id, playgroundSchema.userId),
+      ).innerJoin(
+        oauthSchema,
+        and(
+          eq(oauthSchema.userId, userSchema.id),
+          eq(oauthSchema.serviceId, SERVICES.Discord.id!),
+        ),
+      ).limit(1);
+
+      if (data.length === 0) {
+        return;
+      }
+      const settings = data[0].actionsPlayground.settings as z.infer<typeof OnUserJoinSettings>;
+
+      const response = await fetch(
+        `https://discord.com/api/guilds/${settings.channelId}/members?limit=1`,
+        {
+          headers: {
+            Authorization: `Bot ${Deno.env.get("DISCORD_BOT_TOKEN")}`,
+          },
+        },
+      )
+        .then((res) => {
+          if (!res.ok) {
+            throw {
+              status: res.status,
+              body: res.statusText,
+            };
+          }
+          return res.json();
+        })
+        .catch((err) => {
+          throw {
+            status: 400,
+            body: err,
+          };
+        });
+
+      if (response.length > 0) {
+        actionTrigger(cron.actionPlaygroundId, {});
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+      return;
+    }
+  }
+
+  scheduler.registerTask(parseCronExpression(cron.cron), task);
+}
+
+export default { OnNewMessage, cronOnNewMessage, OnNewMention, cronOnNewMention, OnMessageReaction, cronOnMessageReaction, OnUserJoin, cronOnUserJoin };
