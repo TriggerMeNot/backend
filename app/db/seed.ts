@@ -10,6 +10,10 @@ import { GithubIssueSettings } from "../interfaces/github.ts";
 import {
   OnNewEmailGmailSettings,
   SendEmailGmailSettings,
+  OnNewMessageGroupSettings,
+  OnNewMessageHashtagSettings,
+  OnNewPrivateMessageSettings,
+  OnMessageLikeSettings,
 } from "../interfaces/google.ts";
 import {
   OnNewEmailOutlookSettings,
@@ -21,8 +25,10 @@ import {
   SendTTSMessageSettings,
 } from "../interfaces/discord.ts";
 import { AtTimeSettings } from "../interfaces/default.ts";
-import { OnNewEmailSettings, SendEmailSettings, OnEmailFromUserSettings, OnEmailWithTitleSettings } from "../interfaces/google.ts";
-import { OnNewMessageSettings } from "../interfaces/discord.ts";
+import {
+  OnEmailFromUserSettings,
+  OnEmailWithTitleSettings,
+} from "../interfaces/google.ts";
 
 interface Element {
   id?: number;
@@ -84,17 +90,31 @@ const SERVICES: Record<string, Service> = {
         settings: zodToJsonSchema(OnNewEmailGmailSettings),
       },
       "On Email From User": {
-        description: "Check at each time of the interval if there is a email from a specific user",
+        description:
+          "Check at each time of the interval if there is a email from a specific user",
         settings: zodToJsonSchema(OnEmailFromUserSettings),
       },
       "On Email With Title": {
-        description: "Check at each time of the interval if there is a email with a specific title",
+        description:
+          "Check at each time of the interval if there is a email with a specific title",
         settings: zodToJsonSchema(OnEmailWithTitleSettings),
       },
-      "On Email From User": {
-        description: "Check at each time of the interval if there is a email from a specific user",
-        settings: zodToJsonSchema(OnEmailFromUserSettings),
-      }
+      "On New Message in Group G": {
+        description: "Check for new messages in a specific Google Group",
+        settings: zodToJsonSchema(OnNewMessageGroupSettings),
+      },
+      "On New Message with #Hashtag": {
+        description: "Check for new messages containing a specific hashtag",
+        settings: zodToJsonSchema(OnNewMessageHashtagSettings),
+      },
+      "On New Private Message": {
+        description: "Check for new private messages",
+        settings: zodToJsonSchema(OnNewPrivateMessageSettings),
+      },
+      "On Message Like": {
+        description: "Check if one of the user's messages gets a like",
+        settings: zodToJsonSchema(OnMessageLikeSettings),
+      },
     },
     reactions: {
       "Send Email (Gmail)": {
