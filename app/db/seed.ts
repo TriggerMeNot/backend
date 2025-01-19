@@ -19,6 +19,9 @@ import {
   OnNewMessageSettings,
   SendMessageSettings,
   SendTTSMessageSettings,
+  OnNewMentionSettings,
+  OnMessageReactionSettings,
+  OnUserJoinSettings,
 } from "../interfaces/discord.ts";
 import { AtTimeSettings } from "../interfaces/default.ts";
 
@@ -96,6 +99,18 @@ const SERVICES: Record<string, Service> = {
       "On New Message": {
         description: "When a message as been sent in the last 5 minutes",
         settings: zodToJsonSchema(OnNewMessageSettings),
+      },
+      "On New Mention": {
+        description: "When a User or Role is mentionned",
+        settings: zodToJsonSchema(OnNewMentionSettings),
+      },
+      "On Message Reaction": {
+        description: "When a message has been reacted",
+        settings: zodToJsonSchema(OnMessageReactionSettings),
+      },
+      "On User Join": {
+        description: "When a user joins the server",
+        settings: zodToJsonSchema(OnUserJoinSettings),
       },
     },
     reactions: {
