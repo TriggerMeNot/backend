@@ -13,7 +13,7 @@ services:
     restart:
       unless-stopped
 
-  backend:
+  server:
     container_name: trigger-me-not-api
     build:
       dockerfile: Dockerfile
